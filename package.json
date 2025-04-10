@@ -19,6 +19,7 @@
     "@tailwindcss/vite": "4.0.17",
     "@types/react": "19.0.12",
     "@types/react-dom": "19.0.4",
+    "@vite-pwa/astro": "^1.0.1",
     "astro": "5.5.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

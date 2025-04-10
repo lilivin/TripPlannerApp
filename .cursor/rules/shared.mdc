@@ -1,6 +1,11 @@
 ---
 description: 
 globs: 
+alwaysApply: false
+---
+---
+description: 
+globs: 
 alwaysApply: true
 ---
 # AI Rules for {app-name}
@@ -12,6 +17,7 @@ alwaysApply: true
 - Astro 5
 - TypeScript 5
 - React 19
+- PWA integration with @vite-pwa/astro
 - Tailwind 4
 - Shadcn/ui
 
@@ -31,6 +37,9 @@ When introducing changes to the project, always follow the directory structure b
 - `./src/lib` - Services and helpers 
 - `./src/assets` - static internal assets
 - `./public` - public assets
+- `./src/lib/pwa` – Contains all service worker logic, caching strategies, and utility functions related to PWA features.
+- `./src/types/pwa.ts` – Holds definitions for types and interfaces used in the manifest and in the communication between the service worker and the application.
+- `./src/components/hooks/pwa` – Includes custom hooks to handle PWA-specific events (for example, managing the beforeinstallprompt event).
 
 When modifying the directory structure, always update this section.
 

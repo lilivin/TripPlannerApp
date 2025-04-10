@@ -1,5 +1,10 @@
 ---
 description: 
+globs: 
+alwaysApply: false
+---
+---
+description: 
 globs: *.tsx,*.astro
 alwaysApply: false
 ---
@@ -35,3 +40,27 @@ alwaysApply: false
 - Use aria-describedby to associate descriptive text with form inputs or complex elements
 - Implement aria-current for indicating the current item in a set, navigation, or process
 - Avoid redundant ARIA that duplicates the semantics of native HTML elements
+
+### Guidelines for PWA Integration
+
+#### General PWA Practices
+- Maintain Code Separation: Isolate all PWA-related logic away from UI components. Keep service worker code, manifest type definitions, and related utilities in dedicated directories (e.g. `src/lib/pwa` for service worker logic, `src/types/pwa.ts` for types, and `src/components/hooks/pwa` for PWA-specific hooks).
+- Adopt clear naming conventions for files handling PWA logic, such as `sw.ts` or `service-worker.ts` for service workers and descriptive names for custom hooks and utilities.
+- Create and enforce types for manifest values and service worker messages. Ensure that any cross-boundary data exchange between the service worker and the application is strongly typed in `.ts` files.
+
+#### Guidelines for `.astro` Files
+- Always include `<link rel="manifest" href="/manifest.webmanifest">` in the `<head>` section of layout `.astro` files.
+- Include `<meta name="theme-color" content="...">` in the `<head>`, ensuring that the color value matches the one in the manifest.
+- Do not register the service worker manually within the `.astro` file. Use `@vite-pwa/astro` for proper integration.
+- Keep layout and PWA-specific meta/links separated from content logic to maintain clarity and modularity.
+
+#### Guidelines for `.tsx` Files
+- Do not register service workers directly within React components. Delegate the registration to the established PWA integration (using `@vite-pwa/astro`).
+- Use custom hooks for any PWA-specific behaviors (e.g., handling `beforeinstallprompt` events). Place these hooks in a dedicated folder such as `src/components/hooks/pwa`.
+- Ensure that UI components in `.tsx` files consume PWA state or events through context or props. Avoid mixing PWA business logic with component presentation.
+
+#### Guidelines for `.ts` Files
+- Implement all custom service worker logic and helper functions in `.ts` files, ideally under the `src/lib/pwa/` directory.
+- Define and export interfaces or types for the PWA manifest to ensure consistency across the project.
+- PWA logic in `.ts` files must be self-contained and only interact with other project modules through well-defined interfaces. Avoid unintended side-effects or cross-contamination with non-PWA code.
+- Create helper functions (e.g., for caching strategies or fallback management) as pure functions to facilitate unit testing and reuse.
