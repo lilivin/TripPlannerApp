@@ -3,7 +3,7 @@ import { defineConfig } from "astro/config";
 
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
-import tailwindcss from "@tailwindcss/vite";
+import tailwind from "@astrojs/tailwind";
 import node from "@astrojs/node";
 import VitePWA from "@vite-pwa/astro";
 
@@ -11,11 +11,17 @@ import VitePWA from "@vite-pwa/astro";
 export default defineConfig({
   output: "server",
   experimental: {
-    session: true
+    session: true,
   },
   integrations: [
     react(),
     sitemap(),
+    tailwind({
+      // Optionally provide a config file path
+      configFile: "./tailwind.config.mjs",
+      // Tailor Tailwind CSS to optimize production build sizes
+      applyBaseStyles: false,
+    }),
     VitePWA({
       registerType: "autoUpdate",
       manifest: {
@@ -44,32 +50,28 @@ export default defineConfig({
         runtimeCaching: [
           {
             urlPattern: ({ url }) => {
-              return url.pathname.startsWith('/api/plans/') && 
-                     url.pathname.split('/').length === 4;
+              return url.pathname.startsWith("/api/plans/") && url.pathname.split("/").length === 4;
             },
-            handler: 'CacheFirst',
+            handler: "CacheFirst",
             options: {
-              cacheName: 'api-plans-cache',
+              cacheName: "api-plans-cache",
               expiration: {
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
               },
               cacheableResponse: {
-                statuses: [0, 200]
+                statuses: [0, 200],
               },
               matchOptions: {
-                ignoreSearch: false
-              }
-            }
-          }
-        ]
-      }
+                ignoreSearch: false,
+              },
+            },
+          },
+        ],
+      },
     }),
   ],
   server: { port: 3000 },
-  vite: {
-    plugins: [tailwindcss()],
-  },
   adapter: node({
     mode: "standalone",
   }),
