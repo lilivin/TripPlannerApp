@@ -1,0 +1,19 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { AttractionDetailsPage } from '@/components/AttractionDetailsPage';
+
+// Get the attraction ID from the URL parameter
+const { id } = Astro.params;
+
+// If ID is missing, redirect to 404
+if (!id) {
+  Astro.redirect('/404') // Assuming there's a 404 page
+}
+
+// Title will be updated client-side based on the attraction data
+const title = 'Attraction Details';
+---
+
+<Layout title={title}>
+  <AttractionDetailsPage client:load attractionId={id!} />
+</Layout> 

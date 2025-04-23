@@ -120,4 +120,61 @@ export class ApiError extends Error {
   static internalError(message: string = 'Wystąpił błąd wewnętrzny serwera'): ApiError {
     return new ApiError(ApiErrorTypes.INTERNAL_ERROR, message);
   }
+}
+
+/**
+ * Obsługuje synchronizację planów podróży w trybie offline
+ * @param planId ID planu do synchronizacji
+ * @returns Informacja, czy plan jest dostępny offline
+ */
+export async function handlePlanOfflineSync(planId: string): Promise<boolean> {
+  // Sprawdź, czy przeglądarka wspiera PWA i Service Worker
+  if (!('serviceWorker' in navigator)) {
+    return false;
+  }
+
+  try {
+    // Sprawdź, czy plan jest w cache
+    const cacheStorage = await caches.open('api-plans-cache');
+    const cachedResponse = await cacheStorage.match(`/api/plans/${planId}`);
+    
+    if (cachedResponse) {
+      // Jeśli jesteśmy online, odśwież cache w tle
+      if (navigator.onLine) {
+        refreshPlanCache(planId, cacheStorage).catch(console.error);
+      }
+      return true;
+    } else if (navigator.onLine) {
+      // Jeśli jesteśmy online i plan nie jest w cache, dodaj go
+      await refreshPlanCache(planId, cacheStorage);
+      return true;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Error handling plan offline sync:', error);
+    return false;
+  }
+}
+
+/**
+ * Odświeża cache dla planu podróży
+ * @param planId ID planu do odświeżenia
+ * @param cache Instancja cache do użycia
+ */
+async function refreshPlanCache(planId: string, cache: Cache): Promise<void> {
+  try {
+    const response = await fetch(`/api/plans/${planId}`, {
+      method: 'GET',
+      headers: {
+        'Cache-Control': 'no-cache',
+      },
+    });
+    
+    if (response.ok) {
+      await cache.put(`/api/plans/${planId}`, response.clone());
+    }
+  } catch (error) {
+    console.error('Error refreshing plan cache:', error);
+  }
 } 

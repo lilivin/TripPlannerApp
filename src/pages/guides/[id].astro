@@ -1,0 +1,19 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import GuideDetailPage from '../../components/GuideDetailPage';
+
+// Pobierz parametr ID z URL
+const { id } = Astro.params;
+
+// Sprawdź czy ID jest prawidłowe (uproszczona walidacja)
+const isValidId = typeof id === 'string' && id.length > 0;
+
+// Jeśli ID jest nieprawidłowe, przekieruj na stronę 404
+if (!isValidId) {
+  return Astro.redirect('/404');
+}
+---
+
+<Layout title="Szczegóły przewodnika">
+  <GuideDetailPage client:load id={id} />
+</Layout> 

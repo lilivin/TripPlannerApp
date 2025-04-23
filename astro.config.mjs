@@ -10,6 +10,9 @@ import VitePWA from "@vite-pwa/astro";
 // https://astro.build/config
 export default defineConfig({
   output: "server",
+  experimental: {
+    session: true
+  },
   integrations: [
     react(),
     sitemap(),
@@ -35,6 +38,32 @@ export default defineConfig({
           },
         ],
       },
+      workbox: {
+        navigateFallback: undefined,
+        globPatterns: ["**/*.{js,css,html,svg,png,ico,webp}"],
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => {
+              return url.pathname.startsWith('/api/plans/') && 
+                     url.pathname.split('/').length === 4;
+            },
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'api-plans-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              },
+              matchOptions: {
+                ignoreSearch: false
+              }
+            }
+          }
+        ]
+      }
     }),
   ],
   server: { port: 3000 },

@@ -148,4 +148,195 @@ const createAttraction = async (data) => {
   
   return await response.json();
 };
+```
+
+## Guides API
+
+### GET /api/guides
+
+Retrieves a list of guides with pagination and filtering options.
+
+**Query Parameters:**
+- `page` (optional): Page number, defaults to 1
+- `limit` (optional): Items per page, defaults to 10, max 100
+- `creator_id` (optional): Filter by creator UUID
+- `language` (optional): Filter by language code
+- `location` (optional): Filter by location name
+- `min_days` (optional): Filter by minimum recommended days
+- `max_days` (optional): Filter by maximum recommended days
+- `is_published` (optional): Filter by publication status, defaults to true
+- `search` (optional): Search in title and description
+
+**Validation Rules:**
+- `page`: Positive number
+- `limit`: Positive number, maximum 100
+- `creator_id`: Valid UUID format
+- `min_days` & `max_days`: Positive numbers, min_days must be <= max_days
+- `is_published`: Boolean value
+
+**Response:**
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "title": "string",
+      "description": "string",
+      "language": "string",
+      "price": "decimal",
+      "creator": {
+        "id": "uuid",
+        "display_name": "string"
+      },
+      "location_name": "string",
+      "recommended_days": "integer",
+      "cover_image_url": "string or null",
+      "created_at": "timestamp",
+      "average_rating": "decimal or null"
+    }
+  ],
+  "pagination": {
+    "total": "integer",
+    "page": "integer",
+    "limit": "integer",
+    "pages": "integer"
+  }
+}
+```
+
+**Response Status Codes:**
+- `200 OK`: Guides successfully retrieved
+- `400 Bad Request`: Invalid query parameters
+- `500 Internal Server Error`: Server-side error
+
+**Performance Optimizations:**
+- In-memory caching with 10-minute TTL
+- HTTP Cache-Control headers (max-age=600)
+- Efficient database queries with pagination
+- Single-query calculation of average ratings
+
+**Example Usage:**
+```typescript
+// Fetch all guides
+const fetchGuides = async () => {
+  const response = await fetch('/api/guides');
+  return await response.json();
+};
+
+// Fetch guides with filters
+const fetchFilteredGuides = async (filters) => {
+  const params = new URLSearchParams();
+  
+  if (filters.location) {
+    params.append('location', filters.location);
+  }
+  
+  if (filters.language) {
+    params.append('language', filters.language);
+  }
+  
+  if (filters.minDays) {
+    params.append('min_days', filters.minDays.toString());
+  }
+  
+  if (filters.maxDays) {
+    params.append('max_days', filters.maxDays.toString());
+  }
+  
+  if (filters.search) {
+    params.append('search', filters.search);
+  }
+  
+  if (filters.page) {
+    params.append('page', filters.page.toString());
+  }
+  
+  if (filters.limit) {
+    params.append('limit', filters.limit.toString());
+  }
+  
+  const response = await fetch(`/api/guides?${params.toString()}`);
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to fetch guides');
+  }
+  
+  return await response.json();
+};
+```
+
+### GET /api/guides/{id}
+
+Retrieves detailed information about a specific guide including its attractions.
+
+**Response:**
+```json
+{
+  "id": "uuid",
+  "title": "string",
+  "description": "string",
+  "language": "string",
+  "price": "decimal",
+  "creator": {
+    "id": "uuid",
+    "display_name": "string"
+  },
+  "location_name": "string",
+  "recommended_days": "integer",
+  "cover_image_url": "string or null",
+  "created_at": "timestamp",
+  "updated_at": "timestamp",
+  "is_published": "boolean",
+  "version": "integer",
+  "reviews_count": "integer",
+  "average_rating": "decimal or null",
+  "attractions": [
+    {
+      "id": "uuid",
+      "name": "string",
+      "description": "string",
+      "custom_description": "string or null",
+      "order_index": "integer",
+      "is_highlight": "boolean",
+      "address": "string",
+      "images": ["string"],
+      "tags": [
+        {
+          "id": "uuid",
+          "name": "string",
+          "category": "string"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Response Status Codes:**
+- `200 OK`: Guide successfully retrieved
+- `400 Bad Request`: Invalid guide ID format
+- `404 Not Found`: Guide with the specified ID does not exist
+- `500 Internal Server Error`: Server-side error
+
+**Performance Optimizations:**
+- In-memory caching with 1-hour TTL
+- HTTP Cache-Control headers (max-age=3600)
+- Optimized database queries for related entities (attractions, tags)
+
+**Example Usage:**
+```typescript
+const fetchGuideDetails = async (guideId) => {
+  const response = await fetch(`/api/guides/${guideId}`);
+  
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error('Przewodnik nie został znaleziony');
+    }
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to fetch guide details');
+  }
+  
+  return await response.json();
+};
 ``` 
