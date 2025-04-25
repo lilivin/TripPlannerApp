@@ -667,6 +667,34 @@ Leveraging Supabase Auth service for authentication operations.
 - **Success Codes**: 200 OK
 - **Error Codes**: 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 500 Internal Server Error
 
+### AI Services
+
+#### POST /api/ai/chat
+- **Description**: Send a chat message to AI to get additional information
+- **Request Body**:
+  ```json
+  {
+    "message": "string",
+    "guide_id": "uuid",
+    "plan_id": "uuid",
+    "context": "object"
+  }
+  ```
+- **Response Body**:
+  ```json
+  {
+    "response": "string",
+    "model_used": "string",
+    "tokens": {
+      "prompt": "integer",
+      "completion": "integer",
+      "total": "integer"
+    }
+  }
+  ```
+- **Success Codes**: 200 OK
+- **Error Codes**: 400 Bad Request, 401 Unauthorized, 404 Not Found, 500 Internal Server Error
+
 ## 3. Authentication and Authorization
 
 The API will use Supabase Authentication for handling user authentication. The Supabase client SDK will be integrated on the frontend to manage authentication flows.
@@ -743,6 +771,25 @@ The API leverages Supabase Row-Level Security (RLS) policies to enforce authoriz
      - Calling OpenAI API with appropriate parameters
      - Processing and returning the generated plan
      - Calculating and recording generation cost
+
+### OpenRouter Integration
+
+1. **OpenRouter Service**:
+   - Provides a unified interface to access multiple AI models
+   - Handles authentication and rate limiting with OpenRouter API
+   - Supports various request formats and model specifications
+   - Implements retry logic and error handling
+
+2. **Response Caching**:
+   - Cache AI responses based on input parameters to minimize redundant API calls
+   - Implement cache invalidation strategies for updated content
+   - Store cached responses in Supabase for persistence across deployments
+
+3. **AI Chat Functionality**:
+   - Allow users to ask questions about guides, attractions, or plans
+   - Maintain conversation context for multi-turn interactions
+   - Support context-aware queries with reference to specific guides or plans
+   - Provide relevant, accurate information by retrieving data from the database before processing AI requests
 
 2. **Guide Publication**:
    - Guides start as unpublished drafts

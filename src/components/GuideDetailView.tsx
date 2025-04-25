@@ -1,13 +1,13 @@
-import React from 'react';
-import type { GuideDetailDto } from '@/types';
-import { useReviews } from './hooks/useReviews';
-import GuideHeader from './GuideHeader';
-import GuideGallery from './GuideGallery';
-import GuideContent from './GuideContent';
-import TabNavigation from './TabNavigation';
-import AttractionsList from './AttractionsList';
-import ReviewsSection from './ReviewsSection';
-import GeneratePlanButton from './GeneratePlanButton';
+import React from "react";
+import type { GuideDetailDto } from "@/types";
+import { useReviews } from "./hooks/useReviews";
+import GuideHeader from "./GuideHeader";
+import GuideGallery from "./GuideGallery";
+import GuideContent from "./GuideContent";
+import TabNavigation from "./TabNavigation";
+import AttractionsList from "./AttractionsList";
+import ReviewsSection from "./ReviewsSection";
+import GeneratePlanButton from "./GeneratePlanButton";
 
 interface GuideDetailViewProps {
   guide: GuideDetailDto;
@@ -26,7 +26,7 @@ const GuideDetailView: React.FC<GuideDetailViewProps> = ({
   activeTabIndex,
   setActiveTabIndex,
   expandedAttractions,
-  toggleAttractionExpand
+  toggleAttractionExpand,
 }) => {
   // Pobieramy recenzje dla przewodnika
   const { reviews, isLoading: isReviewsLoading, pagination, fetchPage } = useReviews(guide.id);
@@ -39,7 +39,7 @@ const GuideDetailView: React.FC<GuideDetailViewProps> = ({
   const creatorWithImage = {
     id: guide.creator.id,
     display_name: guide.creator.display_name,
-    profile_image_url: null // Zakładamy, że nie mamy pełnych danych o twórcy w tym miejscu
+    profile_image_url: null, // Zakładamy, że nie mamy pełnych danych o twórcy w tym miejscu
   };
 
   return (
@@ -54,17 +54,13 @@ const GuideDetailView: React.FC<GuideDetailViewProps> = ({
         />
 
         {/* Galeria zdjęć */}
-        <GuideGallery 
-          images={[guide.cover_image_url].filter(Boolean) as string[]} 
-          coverImage={guide.cover_image_url || ''}
+        <GuideGallery
+          images={[guide.cover_image_url].filter(Boolean) as string[]}
+          coverImage={guide.cover_image_url || ""}
         />
 
         {/* Treść przewodnika i informacje o twórcy */}
-        <GuideContent
-          description={guide.description}
-          creator={creatorWithImage}
-          locationName={guide.location_name}
-        />
+        <GuideContent description={guide.description} creator={creatorWithImage} locationName={guide.location_name} />
 
         {/* Nawigacja zakładkowa (atrakcje/recenzje) */}
         <TabNavigation
@@ -108,4 +104,4 @@ const GuideDetailView: React.FC<GuideDetailViewProps> = ({
   );
 };
 
-export default GuideDetailView; 
+export default GuideDetailView;

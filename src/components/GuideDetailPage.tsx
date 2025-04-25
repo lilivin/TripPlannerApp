@@ -1,8 +1,8 @@
-import React from 'react';
-import { useGuideDetail } from './hooks/useGuideDetail';
-import LoadingState from './LoadingState';
-import ErrorState from './ErrorState';
-import GuideDetailView from './GuideDetailView';
+import React from "react";
+import { useGuideDetail } from "./hooks/useGuideDetail";
+import LoadingState from "./LoadingState";
+import ErrorState from "./ErrorState";
+import GuideDetailView from "./GuideDetailView";
 
 interface GuideDetailPageProps {
   id: string;
@@ -21,7 +21,7 @@ const GuideDetailPage: React.FC<GuideDetailPageProps> = ({ id }) => {
     setActiveTabIndex,
     expandedAttractions,
     toggleAttractionExpand,
-    refetch
+    refetch,
   } = useGuideDetail(id);
 
   // Wyświetl stan ładowania
@@ -31,11 +31,7 @@ const GuideDetailPage: React.FC<GuideDetailPageProps> = ({ id }) => {
 
   // Wyświetl stan błędu
   if (error) {
-    return <ErrorState 
-      code={error.code} 
-      message={error.message} 
-      onRetry={refetch} 
-    />;
+    return <ErrorState code={error.code} message={error.message} onRetry={refetch} />;
   }
 
   // Wyświetl główny widok jeśli dane są dostępne
@@ -52,11 +48,7 @@ const GuideDetailPage: React.FC<GuideDetailPageProps> = ({ id }) => {
   }
 
   // Fallback - nie powinien wystąpić, ale dla bezpieczeństwa
-  return <ErrorState 
-    code={404} 
-    message="Nie znaleziono przewodnika" 
-    onRetry={refetch} 
-  />;
+  return <ErrorState code={404} message="Nie znaleziono przewodnika" onRetry={refetch} />;
 };
 
-export default GuideDetailPage; 
+export default GuideDetailPage;

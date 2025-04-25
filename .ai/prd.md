@@ -236,6 +236,12 @@ W ramach MVP aplikacja powinna zapewnić:
   - reviews - recenzje przewodników
   - offline_cache_status - status dostępności offline planów
 
+### 6.4. Integracja z AI
+- Wykorzystanie OpenRouter jako serwisu pośredniczącego w komunikacji z modelami AI
+- Implementacja mechanizmu cache'owania odpowiedzi AI dla optymalizacji kosztów i wydajności
+- Wsparcie dla zaawansowanych zapytań w formie chatu dla uzyskiwania dodatkowych informacji o atrakcjach i miejscach
+- Możliwość personalizacji planów wycieczek z wykorzystaniem różnych modeli AI dostępnych przez OpenRouter
+
 ## 7. Metryki sukcesu
 1. Liczba wygenerowanych planów dziennie (i zapisywanych) na bazie różnych przewodników.
 2. Retencja użytkowników (powroty, korzystanie z przewodników).

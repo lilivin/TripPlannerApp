@@ -1,81 +1,134 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { GeneratePlanCommand, GeneratePlanResponse, GuideDetailDto } from '../../types';
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { GeneratePlanCommand, GeneratePlanResponse, GuideDetailDto } from "../../types";
+import type { Json } from "../../db/database.types";
+import { OpenRouterService } from "./openrouter";
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || import.meta.env.OPENROUTER_API_KEY;
-const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const MODEL = 'openai/gpt-4o';
+const MODEL = "openai/gpt-4o";
 
+/**
+ * Generuje plan podróży na podstawie przewodnika i preferencji użytkownika
+ * Wykorzystuje OpenRouterService do komunikacji z API AI
+ */
 export async function generatePlan(
   supabase: SupabaseClient,
   guide: GuideDetailDto,
   command: GeneratePlanCommand,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   userId: string
 ): Promise<GeneratePlanResponse> {
-  // Przygotuj prompt na podstawie przewodnika i preferencji
-  const prompt = `Wygeneruj plan podróży na ${command.days} dni na podstawie przewodnika: ${guide.title}. Preferencje: ${JSON.stringify(command.preferences)}.`;
+  // Extract attractions data to use in the prompt
+  const attractions = guide.attractions || [];
 
-  if (!OPENROUTER_API_KEY) {
-    throw new Error('Brak klucza OPENROUTER_API_KEY w zmiennych środowiskowych');
+  // Sprawdź czy lista atrakcji nie jest pusta
+  if (attractions.length === 0) {
+    throw new Error("Przewodnik nie zawiera żadnych atrakcji");
   }
+
+  // Prepare attractions data in a structured way for the AI
+  const attractionsData = attractions.map((attraction) => ({
+    id: attraction.id,
+    name: attraction.name,
+    description: attraction.description.substring(0, 150) + (attraction.description.length > 150 ? "..." : ""),
+    is_highlight: attraction.is_highlight,
+    address: attraction.address,
+  }));
+
+  // Przygotuj prostszy prompt na podstawie przewodnika i atrakcji
+  const prompt = `Stwórz plan podróży na ${command.days} dni dla miejsca "${guide.location_name}" na podstawie tylko tych atrakcji:
+${attractionsData.map((a) => `- ${a.name} ${a.is_highlight ? "(highlight)" : ""}`).join("\n")}
+
+Uwzględnij preferencje:
+- Dni: ${command.days}
+${command.preferences.start_time ? `- Początek dnia: ${command.preferences.start_time}` : ""}
+${command.preferences.end_time ? `- Koniec dnia: ${command.preferences.end_time}` : ""}
+${command.preferences.include_meals ? "- Uwzględnij posiłki" : ""}
+${command.preferences.transportation_mode ? `- Transport: ${command.preferences.transportation_mode}` : ""}
+
+NIE DODAWAJ żadnych atrakcji spoza listy.`;
+
+  console.log("AI Prompt:", prompt);
 
   try {
-    const response = await fetch(OPENROUTER_API_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
+    // Pobierz klucz API z zmiennych środowiskowych
+    const apiKey = import.meta.env.OPENROUTER_API_KEY;
+
+    if (!apiKey) {
+      console.error("Brak klucza API dla OpenRouter");
+      throw new Error("Brak klucza API dla generowania planu");
+    }
+
+    // Inicjalizacja serwisu OpenRouter z jawnym podaniem klucza API
+    const openRouter = new OpenRouterService({
+      apiKey,
+      defaultModel: MODEL,
+      defaultParams: {
+        max_tokens: 1500,
+        temperature: 0.7,
       },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [
-          { role: 'system', content: 'Jesteś asystentem podróży. Odpowiadaj w formacie JSON.' },
-          { role: 'user', content: prompt }
-        ],
-        max_tokens: 2048,
-        temperature: 0.7
-      })
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Błąd AI: ${response.status} ${errorText}`);
-    }
-
-    const data = await response.json();
-    let aiMessage = data.choices[0].message.content.trim();
-    // Usuń blokowe znaczniki kodu
-    if (aiMessage.startsWith('```json')) {
-      aiMessage = aiMessage.slice(7);
-    }
-    if (aiMessage.startsWith('```')) {
-      aiMessage = aiMessage.slice(3);
-    }
-    if (aiMessage.endsWith('```')) {
-      aiMessage = aiMessage.slice(0, -3);
-    }
-    let content;
     try {
-      content = JSON.parse(aiMessage);
-    } catch (e) {
-      console.error('Nieprawidłowy JSON z AI:', aiMessage);
-      throw new Error('AI zwróciło nieprawidłowy JSON');
-    }
-    // Koszt na podstawie usage (jeśli dostępny)
-    const ai_generation_cost = data.usage?.total_cost ?? null;
+      // Generowanie odpowiedzi tekstowej
+      console.log("Generowanie odpowiedzi tekstowej...");
+      const response = await openRouter.generateChatCompletion(
+        [
+          {
+            role: "system",
+            content: "Jesteś asystentem podróży. Tworzysz plany zwiedzania w formacie tekstowym.",
+          },
+          { role: "user", content: prompt },
+        ],
+        {
+          model: MODEL,
+          params: {
+            temperature: 0.7,
+            max_tokens: 1500,
+          },
+        }
+      );
 
-    return {
-      content,
-      generation_params: {
-        model: MODEL,
-        prompt,
-        preferences: command.preferences,
-        days: command.days,
-        guide_id: command.guide_id
-      },
-      ai_generation_cost
-    };
-  } catch (err: any) {
-    console.error('Błąd wywołania AI:', err);
-    throw new Error('Błąd generowania planu przez AI');
+      console.log("OpenRouter odpowiedział:", response.choices?.length > 0 ? "sukces" : "brak odpowiedzi");
+
+      // Pobierz zawartość z pierwszej odpowiedzi
+      const content = response.choices[0]?.message?.content || "Nie udało się wygenerować planu.";
+
+      // Zwróć tekstową odpowiedź jako zawartość (poprawiony format)
+      return {
+        content: {
+          title: `Plan na ${command.days} dni w ${guide.location_name}`,
+          summary: content,
+          days: [],
+        } as Json,
+        generation_params: {
+          model: MODEL,
+          days: command.days,
+          guide_id: command.guide_id,
+          preferences: command.preferences,
+        } as Json,
+        ai_generation_cost: null,
+      };
+    } catch (error) {
+      console.error("Błąd generowania odpowiedzi:", error);
+
+      // Zwróć informację o błędzie w formie planu (poprawiony format)
+      return {
+        content: {
+          title: `Plan nie mógł zostać wygenerowany`,
+          summary: "Wystąpił problem z serwisem AI. Spróbuj ponownie później lub skontaktuj się z administracją.",
+          error: String(error),
+          days: [],
+        } as Json,
+        generation_params: {
+          model: MODEL,
+          days: command.days,
+          guide_id: command.guide_id,
+          preferences: command.preferences,
+        } as Json,
+        ai_generation_cost: null,
+      };
+    }
+  } catch (error: unknown) {
+    console.error("Błąd wywołania AI:", error);
+    throw new Error("Błąd generowania planu przez AI");
   }
-} 
+}

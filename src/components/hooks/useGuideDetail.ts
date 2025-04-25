@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import type { GuideDetailDto } from '@/types';
+import { useState, useEffect } from "react";
+import type { GuideDetailDto } from "@/types";
 
 // Definiuję lokalnie typ ApiError, który nie jest dostępny w importowanych typach
 interface ApiError {
@@ -24,19 +24,26 @@ export const useGuideDetail = (guideId: string) => {
   const fetchGuide = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/guides/${guideId}?include_attractions=true`);
+      const url = `/api/guides/${guideId}?include_attractions=true`;
+      console.log("Component: Fetching guide from URL:", url);
+
+      const response = await fetch(url);
+      console.log("Component: Response status:", response.status);
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.log("Component: Error data:", errorData);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
+      console.log("Component: Guide data:", data);
       setGuide(data);
       setError(null);
     } catch (e) {
       const error = e as Error;
       setError({
         code: error instanceof Response ? error.status : 500,
-        message: error.message || 'Nieoczekiwany błąd podczas pobierania przewodnika'
+        message: error.message || "Nieoczekiwany błąd podczas pobierania przewodnika",
       });
     } finally {
       setIsLoading(false);
@@ -45,9 +52,9 @@ export const useGuideDetail = (guideId: string) => {
 
   // Funkcja przełączająca rozwinięcie atrakcji
   const toggleAttractionExpand = (attractionId: string) => {
-    setExpandedAttractions(prev => ({
+    setExpandedAttractions((prev) => ({
       ...prev,
-      [attractionId]: !prev[attractionId]
+      [attractionId]: !prev[attractionId],
     }));
   };
 
@@ -63,6 +70,6 @@ export const useGuideDetail = (guideId: string) => {
     setActiveTabIndex,
     expandedAttractions,
     toggleAttractionExpand,
-    refetch: fetchGuide
+    refetch: fetchGuide,
   };
-}; 
+};
