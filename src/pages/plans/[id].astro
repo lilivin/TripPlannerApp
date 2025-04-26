@@ -1,0 +1,12 @@
+---
+import MainLayout from "@/layouts/MainLayout.astro";
+import SinglePlanView from "@/components/plan-details/SinglePlanView";
+
+// Sprawdź, czy ID jest dostępne i przekaż je do komponentu
+const { id } = Astro.params;
+if (!id) return Astro.redirect("/404");
+---
+
+<MainLayout title="Plan Details">
+  <SinglePlanView client:load planId={id} />
+</MainLayout>

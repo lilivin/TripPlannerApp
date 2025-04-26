@@ -55,17 +55,17 @@ export async function getUserPlans(
     if (error) throw error;
 
     // Transform results to DTO format
-    const planDtos: PlanSummaryDto[] = data.map((plan: any) => ({
-      id: plan.id,
-      name: plan.name,
+    const planDtos: PlanSummaryDto[] = data.map((plan: Record<string, unknown>) => ({
+      id: plan.id as string,
+      name: plan.name as string,
       guide: {
-        id: plan.guide.id,
-        title: plan.guide.title,
-        location_name: plan.guide.location_name,
+        id: (plan.guide as Record<string, unknown>).id as string,
+        title: (plan.guide as Record<string, unknown>).title as string,
+        location_name: (plan.guide as Record<string, unknown>).location_name as string,
       },
-      created_at: plan.created_at,
-      updated_at: plan.updated_at,
-      is_favorite: plan.is_favorite,
+      created_at: plan.created_at as string,
+      updated_at: plan.updated_at as string,
+      is_favorite: plan.is_favorite as boolean,
     }));
 
     // Prepare pagination info
@@ -208,4 +208,48 @@ export async function createPlan(
     content: newPlan.content,
     generation_params: newPlan.generation_params,
   };
+}
+
+export async function updatePlan(
+  supabase: SupabaseClient<Database>,
+  planId: string,
+  userId: string | null,
+  updateData: {
+    name?: string;
+    content?: Record<string, unknown>;
+    is_favorite?: boolean;
+  }
+): Promise<PlanDetailDto> {
+  try {
+    // Sprawdź, czy plan istnieje - to rzuci błąd, jeśli plan nie istnieje
+    await getPlanById(supabase, planId, userId);
+
+    // Przygotuj dane do aktualizacji
+    const updatePayload: Record<string, unknown> = {};
+    if (updateData.name !== undefined) updatePayload.name = updateData.name;
+    if (updateData.content !== undefined) updatePayload.content = updateData.content;
+    if (updateData.is_favorite !== undefined) updatePayload.is_favorite = updateData.is_favorite;
+    updatePayload.updated_at = new Date().toISOString();
+
+    // Aktualizuj plan
+    let query = supabase.from("plans").update(updatePayload).eq("id", planId).is("deleted_at", null);
+
+    // Dodaj filtr użytkownika tylko gdy userId jest dostępne
+    if (userId) {
+      query = query.eq("user_id", userId);
+    }
+
+    const { error } = await query;
+
+    if (error) {
+      console.error("Error updating plan:", error);
+      throw new Error("Failed to update plan");
+    }
+
+    // Pobierz zaktualizowany plan
+    return await getPlanById(supabase, planId, userId);
+  } catch (error) {
+    console.error("Error in updatePlan:", error);
+    throw error;
+  }
 }

@@ -371,6 +371,14 @@ export interface UpdatePlanCommand {
 }
 
 /**
+ * Save plan form data
+ */
+export interface SavePlanFormData {
+  name: string;
+  isFavorite: boolean;
+}
+
+/**
  * User with avatar DTO
  */
 export interface UserWithAvatarDto {
@@ -445,5 +453,5 @@ export const attractionsQuerySchema = {
     // Implementation would use a validation library like Zod
     // This is just a stub for the example
     return { success: true, data };
-  }
-}; 
+  },
+};

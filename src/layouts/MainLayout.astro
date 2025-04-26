@@ -1,0 +1,59 @@
+---
+import Layout from "./Layout.astro";
+
+interface Props {
+  title?: string;
+}
+
+const { title = "Trip Planner App" } = Astro.props;
+---
+
+<Layout title={title}>
+  <div class="min-h-screen bg-background">
+    <header class="sticky top-0 z-40 w-full border-b bg-background">
+      <div class="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
+        <div class="flex gap-6 md:gap-10">
+          <a href="/" class="flex items-center space-x-2">
+            <span class="inline-block font-bold">Trip Planner</span>
+          </a>
+          <nav class="hidden gap-6 md:flex">
+            <a href="/guides" class="flex items-center text-sm font-medium text-muted-foreground"> Guides </a>
+            <a href="/plans" class="flex items-center text-sm font-medium text-muted-foreground"> My Plans </a>
+          </nav>
+        </div>
+        <div class="flex flex-1 items-center justify-end space-x-4">
+          <nav class="flex items-center space-x-2">
+            <a href="/account" class="p-2 text-foreground bg-background hover:bg-muted rounded-md">
+              <span class="sr-only">Account</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-5 w-5"
+              >
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </a>
+          </nav>
+        </div>
+      </div>
+    </header>
+    <main class="flex-1">
+      <slot />
+    </main>
+    <footer class="py-6 md:px-8 md:py-0">
+      <div class="container flex flex-col items-center justify-between gap-4 md:h-16 md:flex-row">
+        <p class="text-center text-sm leading-loose text-muted-foreground md:text-left">
+          &copy; {new Date().getFullYear()} Trip Planner App. All rights reserved.
+        </p>
+      </div>
+    </footer>
+  </div>
+</Layout>

@@ -3,7 +3,6 @@ import GuideSummaryCard from "./GuideSummaryCard";
 import GeneratePlanForm from "./GeneratePlanForm";
 import useGeneratePlanForm from "./hooks/useGeneratePlanForm";
 import type { GuideDetailDto, TagDto } from "../types";
-import type { GeneratePlanResponse } from "../types/plan";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { AlertCircle, Info } from "lucide-react";
 
@@ -96,82 +95,26 @@ const GuideGeneratePlanView = ({ guideId }: GuideGeneratePlanViewProps) => {
       const response = await formHook.submitForm();
 
       if (response) {
-        // Create a new plan from the response
-        const planResponse = await createPlan(response, guide?.title || "Nowy plan");
+        console.log("API Response:", response);
+        console.log("Response content:", response.content);
 
-        if (planResponse) {
-          // Navigate to the newly created plan
-          navigateTo(`/plans/${planResponse.id}`);
+        // Sprawdź strukturę danych - czy zawiera dni i atrakcje
+        if (!response.content || typeof response.content !== "object" || !("days" in response.content)) {
+          console.error("Response content is missing 'days' array:", response.content);
+          setSavingError("Wygenerowany plan nie zawiera poprawnej struktury danych");
+          return;
         }
+
+        // Store the generated plan in localStorage for the preview page
+        localStorage.setItem(`generated_plan_${guideId}`, JSON.stringify(response));
+
+        // Navigate to the preview page instead of creating a plan directly
+        navigateTo(`/guides/${guideId}/generate/preview`);
       }
     } catch (error) {
-      console.error("Błąd podczas tworzenia planu:", error);
+      console.error("Błąd podczas generowania planu:", error);
       const errorMessage = error instanceof Error ? error.message : "Nieznany błąd";
-      setSavingError(`Nie udało się zapisać planu: ${errorMessage}`);
-    }
-  };
-
-  // Create plan in database
-  const createPlan = async (generatedPlan: GeneratePlanResponse, guideName: string): Promise<{ id: string } | null> => {
-    if (!guide) {
-      throw new Error("Brak danych przewodnika");
-    }
-
-    try {
-      // Ensure the content has the expected structure
-      const planContent =
-        typeof generatedPlan.content === "string"
-          ? { title: `Plan na ${formHook.formData.days} dni`, summary: generatedPlan.content, days: [] }
-          : generatedPlan.content;
-
-      const planData = {
-        name: `${guideName} - Plan na ${formHook.formData.days} ${formHook.formData.days === 1 ? "dzień" : "dni"}`,
-        guide_id: guide.id,
-        content: planContent,
-        generation_params: generatedPlan.generation_params,
-        is_favorite: false,
-      };
-
-      console.log("Wysyłanie planu (pełne dane):", JSON.stringify(planData, null, 2));
-
-      const response = await fetch("/api/plans", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify(planData),
-        credentials: "include", // Add this to ensure cookies are sent
-      });
-
-      let responseData;
-      const responseText = await response.text();
-      try {
-        responseData = JSON.parse(responseText);
-        console.log("Odpowiedź z API (sparsowana):", responseData);
-      } catch (error) {
-        console.error("Nie udało się sparsować odpowiedzi JSON:", responseText, error);
-        throw new Error("Nieprawidłowa odpowiedź z serwera");
-      }
-
-      if (!response.ok) {
-        const errorMessage = responseData?.error || responseData?.message || `Błąd HTTP: ${response.status}`;
-        console.error("Szczegóły błędu z API:", {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorMessage,
-          response: responseData,
-        });
-        throw new Error(errorMessage);
-      }
-
-      return responseData;
-    } catch (error) {
-      console.error("Szczegóły błędu podczas zapisywania planu:", error);
-      if (error instanceof Error) {
-        throw new Error(`Nie udało się zapisać planu: ${error.message}`);
-      }
-      throw error;
+      setSavingError(`Nie udało się wygenerować planu: ${errorMessage}`);
     }
   };
 
