@@ -1,5 +1,5 @@
 ---
-import Layout from "../../layouts/Layout.astro";
+import MainLayout from "../../layouts/MainLayout.astro";
 import GuideDetailPage from "../../components/GuideDetailPage";
 
 // Pobierz parametr ID z URL
@@ -14,6 +14,6 @@ if (!isValidId) {
 }
 ---
 
-<Layout title="Szczegóły przewodnika">
+<MainLayout title="Szczegóły przewodnika">
   <GuideDetailPage client:load id={id} />
-</Layout>
+</MainLayout>

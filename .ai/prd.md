@@ -35,7 +35,13 @@ W ramach MVP aplikacja powinna zapewnić:
    - Opcja ustawienia tempa zwiedzania.
    - Możliwość filtrowania typów atrakcji (uwzględnianie lub wykluczanie).
 4. Logowanie i zarządzanie kontem użytkownika:
-   - Rejestracja i logowanie (integracja z Supabase Auth).
+   - Rejestracja i logowanie realizowane na dedykowanych stronach (integracja z Supabase Auth).
+   - Logowanie wymaga podania wyłącznie adresu email i hasła.
+   - Rejestracja wymaga podania adresu email, hasła i potwierdzenia hasła.
+   - Możliwość odzyskiwania hasła przez użytkownika.
+   - Użytkownik niezalogowany może przeglądać dostępne przewodniki, ale nie może zobaczyć szczegółów atrakcji, kupić przewodników ani stworzyć planu.
+   - Przycisk logowania/wylogowania dostępny w prawym górnym rogu interfejsu.
+   - Brak integracji z zewnętrznymi serwisami logowania (np. Google, GitHub).
    - Przechowywanie planów w profilu użytkownika.
    - Wybór języka interfejsu (polski/angielski).
    - Zarządzanie dostępem do przewodników (w tym płatnych w przyszłych wersjach).
@@ -78,19 +84,25 @@ W ramach MVP aplikacja powinna zapewnić:
 - Tytuł: Rejestracja nowego użytkownika
 - Opis: Jako nowy użytkownik chcę założyć konto w aplikacji, aby móc tworzyć i zapisywać swoje plany wycieczek.
 - Kryteria akceptacji:
+  - Aplikacja udostępnia dedykowaną stronę rejestracji z formularzem zawierającym pola: adres email, hasło i potwierdzenie hasła.
+  - System waliduje format adresu email oraz zgodność haseł.
   - Po wypełnieniu formularza rejestracji system tworzy konto z unikalnym identyfikatorem.
   - System zwraca komunikat potwierdzający pomyślną rejestrację.
   - Dane logowania są bezpiecznie przechowywane w bazie (Supabase).
   - System weryfikuje adres email użytkownika.
+  - Aplikacja nie oferuje rejestracji przez zewnętrzne serwisy jak Google czy GitHub.
 
 ### US-002
 - Tytuł: Logowanie użytkownika
 - Opis: Jako zarejestrowany użytkownik chcę móc się zalogować, aby mieć dostęp do swojego prywatnego konta i zapisanych planów.
 - Kryteria akceptacji:
+  - Aplikacja udostępnia dedykowaną stronę logowania z formularzem zawierającym pola: adres email i hasło.
+  - Przycisk logowania jest widoczny w prawym górnym rogu interfejsu dla niezalogowanych użytkowników.
   - Po wprowadzeniu prawidłowych danych użytkownik zostaje zalogowany.
   - Użytkownik uzyskuje dostęp do sekcji prywatnej aplikacji (np. „Moje plany").
   - W przypadku błędnych danych logowania system wyświetla stosowny komunikat.
-  - System obsługuje opcję resetowania hasła.
+  - System oferuje opcję "Zapomniałem hasła" umożliwiającą odzyskanie dostępu do konta.
+  - Aplikacja nie oferuje logowania przez zewnętrzne serwisy jak Google czy GitHub.
 
 ### US-003
 - Tytuł: Przegląd listy dostępnych przewodników
@@ -101,6 +113,7 @@ W ramach MVP aplikacja powinna zapewnić:
   - System umożliwia filtrowanie przewodników według lokalizacji, języka, twórcy i tagów.
   - System obsługuje paginację listy przewodników.
   - Jeśli lista jest pusta, aplikacja wyświetla komunikat o braku dostępnych przewodników.
+  - Niezalogowani użytkownicy mogą przeglądać listę przewodników, ale bez możliwości zobaczenia szczegółów atrakcji, zakupu przewodników ani tworzenia planów.
 
 ### US-004
 - Tytuł: Wyświetlenie szczegółów wybranego przewodnika
@@ -202,9 +215,11 @@ W ramach MVP aplikacja powinna zapewnić:
 - Tytuł: Wylogowanie z aplikacji
 - Opis: Jako zalogowany użytkownik chcę mieć możliwość bezpiecznego wylogowania się z aplikacji, aby zakończyć sesję i chronić dane mojego konta.
 - Kryteria akceptacji:
+  - Przycisk wylogowania jest widoczny w prawym górnym rogu interfejsu dla zalogowanych użytkowników.
   - Po wybraniu opcji „Wyloguj" aplikacja unieważnia sesję (token) i przekierowuje do ekranu logowania.
   - Dane sesji są usuwane z pamięci aplikacji.
-  - Po wylogowaniu użytkownik nie ma dostępu do sekcji prywatnej.
+  - Po wylogowaniu użytkownik nie ma dostępu do sekcji prywatnej aplikacji.
+  - System wyświetla komunikat potwierdzający pomyślne wylogowanie.
 
 ## 6. Architektura techniczna
 

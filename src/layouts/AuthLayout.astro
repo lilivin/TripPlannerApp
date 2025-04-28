@@ -1,0 +1,48 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  heading?: string;
+}
+
+const { title = "Authentication | TripPlannerApp", heading = "Account" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#0f172a" />
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <div class="flex min-h-screen flex-col items-center justify-center px-6 py-12">
+      <div class="w-full max-w-md">
+        <div class="flex justify-center">
+          <a href="/" class="flex items-center">
+            <img src="/logo.png" class="h-12" alt="TripPlannerApp Logo" />
+          </a>
+        </div>
+
+        <h2 class="mt-8 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
+          {heading}
+        </h2>
+
+        <div class="mt-8 bg-white px-6 py-8 shadow sm:rounded-lg sm:px-8">
+          <slot />
+        </div>
+
+        <p class="mt-6 text-center text-sm text-gray-500">
+          <a href="/terms" class="font-medium text-indigo-600 hover:text-indigo-500">Terms of Service</a>
+          &nbsp;·&nbsp;
+          <a href="/privacy" class="font-medium text-indigo-600 hover:text-indigo-500">Privacy Policy</a>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

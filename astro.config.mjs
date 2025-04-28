@@ -1,5 +1,7 @@
 // @ts-check
 import { defineConfig } from "astro/config";
+import { fileURLToPath } from "url";
+import path from "path";
 
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
@@ -7,11 +9,20 @@ import tailwind from "@astrojs/tailwind";
 import node from "@astrojs/node";
 import VitePWA from "@vite-pwa/astro";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 // https://astro.build/config
 export default defineConfig({
   output: "server",
   experimental: {
     session: true,
+  },
+  vite: {
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+      },
+    },
   },
   integrations: [
     react(),

@@ -1,0 +1,8 @@
+---
+import AuthLayout from "../layouts/AuthLayout.astro";
+import LoginForm from "../components/auth/LoginForm";
+---
+
+<AuthLayout title="Sign In | TripPlannerApp" heading="Sign in to your account">
+  <LoginForm client:load />
+</AuthLayout>

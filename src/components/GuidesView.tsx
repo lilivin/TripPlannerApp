@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react';
-import type { GuideSummaryDto, GuideQuery, PaginationInfo, GuideListResponse } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { AlertCircle, RefreshCw } from '@/components/ui/icons';
-import GuidesFiltersPanel from './GuidesFiltersPanel';
-import GuidesList from './GuidesList';
+import { useState, useEffect } from "react";
+import type { GuideSummaryDto, PaginationInfo, GuideListResponse } from "@/types";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { AlertCircle, RefreshCw } from "@/components/ui/icons";
+import GuidesFiltersPanel from "./GuidesFiltersPanel";
+import GuidesList from "./GuidesList";
+import { AuthProvider } from "./AuthProvider";
+import { apiClient, ApiClientError } from "@/lib/utils/api-client";
 
 // Error types for better error handling
-type ErrorType = 'network' | 'server' | 'notFound' | 'unknown';
+type ErrorType = "network" | "server" | "notFound" | "unknown" | "auth";
 
 interface ErrorState {
   type: ErrorType;
@@ -27,7 +29,7 @@ interface GuidesFilterViewModel {
   limit?: number;
 }
 
-export default function GuidesView() {
+function GuidesViewContent() {
   // State management
   const [filters, setFilters] = useState<GuidesFilterViewModel>({
     page: 1,
@@ -57,41 +59,42 @@ export default function GuidesView() {
         }
       });
 
-      // Add timeout for network error handling
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15-second timeout
+      console.log("Fetching guides from API...");
 
-      // Fetch guides from API
-      const response = await fetch(`/api/guides?${queryParams.toString()}`, {
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
+      // Use our apiClient utility
+      const data = await apiClient<GuideListResponse>(`/api/guides?${queryParams.toString()}`);
 
-      // Handle HTTP status codes
-      if (response.status === 404) {
-        throw { type: 'notFound', message: 'The requested resource was not found' };
-      } else if (response.status >= 500) {
-        throw { type: 'server', message: 'The server encountered an error. Please try again later.' };
-      } else if (!response.ok) {
-        throw { type: 'unknown', message: `Failed to fetch guides: ${response.statusText}` };
-      }
-
-      const data: GuideListResponse = await response.json();
+      console.log("Guides loaded successfully:", data.data.length);
       setGuides(data.data);
       setPagination(data.pagination);
     } catch (err) {
-      console.error('Error fetching guides:', err);
-      
+      console.error("Error fetching guides:", err);
+
       // Categorize errors for better user feedback
-      if (err instanceof DOMException && err.name === 'AbortError') {
-        setError({ type: 'network', message: 'Request timed out. Please check your connection and try again.' });
-      } else if (err instanceof TypeError && err.message.includes('fetch')) {
-        setError({ type: 'network', message: 'Unable to connect to the server. Please check your internet connection.' });
-      } else if (err && typeof err === 'object' && 'type' in err) {
-        setError(err as ErrorState);
+      if (err instanceof ApiClientError) {
+        const errorType: ErrorType =
+          err.status === 404
+            ? "notFound"
+            : err.status && err.status >= 500
+              ? "server"
+              : err.message.includes("timed out")
+                ? "network"
+                : "unknown";
+
+        setError({
+          type: errorType,
+          message: err.message,
+        });
+      } else if (err instanceof Error) {
+        setError({
+          type: "unknown",
+          message: err.message || "An unexpected error occurred. Please try again.",
+        });
       } else {
-        setError({ type: 'unknown', message: 'An unexpected error occurred. Please try again.' });
+        setError({
+          type: "unknown",
+          message: "An unexpected error occurred. Please try again.",
+        });
       }
     } finally {
       setLoading(false);
@@ -104,11 +107,11 @@ export default function GuidesView() {
     if (newFilters.min_days && newFilters.min_days < 1) {
       newFilters.min_days = 1;
     }
-    
+
     if (newFilters.max_days && newFilters.min_days && newFilters.max_days < newFilters.min_days) {
       newFilters.max_days = newFilters.min_days;
     }
-    
+
     // Reset to page 1 when filters change
     setFilters({ ...newFilters, page: 1 });
   };
@@ -118,8 +121,8 @@ export default function GuidesView() {
     // Ensure page is within valid range
     if (page < 1) page = 1;
     if (pagination.pages && page > pagination.pages) page = pagination.pages;
-    
-    setFilters(prev => ({ ...prev, page }));
+
+    setFilters((prev) => ({ ...prev, page }));
   };
 
   // Get error UI based on error type
@@ -130,12 +133,13 @@ export default function GuidesView() {
       network: "bg-yellow-100 border-yellow-400 text-yellow-800",
       server: "bg-red-100 border-red-400 text-red-800",
       notFound: "bg-blue-100 border-blue-400 text-blue-800",
-      unknown: "bg-gray-100 border-gray-400 text-gray-800"
+      unknown: "bg-gray-100 border-gray-400 text-gray-800",
+      auth: "bg-orange-100 border-orange-400 text-orange-800",
     };
 
     return (
-      <div 
-        className={`${errorClasses[error.type]} border px-4 py-3 rounded mb-6 flex items-start justify-between`} 
+      <div
+        className={`${errorClasses[error.type]} border px-4 py-3 rounded mb-6 flex items-start justify-between`}
         role="alert"
         aria-live="assertive"
       >
@@ -143,8 +147,8 @@ export default function GuidesView() {
           <AlertCircle className="h-5 w-5 mr-2" />
           <p>{error.message}</p>
         </div>
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           size="sm"
           onClick={fetchGuides}
           aria-label="Try again"
@@ -169,21 +173,66 @@ export default function GuidesView() {
           <CardTitle className="text-2xl font-bold">Find Your Perfect Guide</CardTitle>
         </CardHeader>
         <CardContent>
-          <GuidesFiltersPanel
-            initialFilters={filters} 
-            onFiltersChange={handleFiltersChange} 
-          />
+          <GuidesFiltersPanel initialFilters={filters} onFiltersChange={handleFiltersChange} />
         </CardContent>
       </Card>
 
       {getErrorUI()}
 
-      <GuidesList
-        guides={guides}
-        pagination={pagination}
-        onPageChange={handlePageChange}
-        loading={loading}
-      />
+      <GuidesList guides={guides} pagination={pagination} onPageChange={handlePageChange} loading={loading} />
     </div>
   );
-} 
+}
+
+export default function GuidesView() {
+  return (
+    <ErrorBoundary>
+      <AuthProvider>
+        <GuidesViewContent />
+      </AuthProvider>
+    </ErrorBoundary>
+  );
+}
+
+// Simple error boundary component
+function ErrorBoundary({ children }: { children: React.ReactNode }) {
+  const [hasError, setHasError] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const errorHandler = (error: ErrorEvent) => {
+      console.error("Global error caught:", error);
+      setHasError(true);
+      setError(error.error || new Error("Unknown error occurred"));
+    };
+
+    window.addEventListener("error", errorHandler);
+    return () => window.removeEventListener("error", errorHandler);
+  }, []);
+
+  if (hasError) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded" role="alert">
+          <p className="font-bold">Something went wrong</p>
+          <p>{error?.message || "An unknown error occurred. Please try refreshing the page."}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  try {
+    return <>{children}</>;
+  } catch (err) {
+    console.error("Render error:", err);
+    setHasError(true);
+    setError(err instanceof Error ? err : new Error("Unknown render error"));
+    return null;
+  }
+}

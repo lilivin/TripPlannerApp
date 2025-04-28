@@ -1,11 +1,11 @@
 ---
-import Layout from "@/layouts/Layout.astro";
+import MainLayout from "../../../../layouts/MainLayout.astro";
 import PlanPreviewPage from "@/components/PlanPreviewPage";
 
 const { id } = Astro.params;
 export const prerender = false;
 ---
 
-<Layout title="Preview Generated Plan">
+<MainLayout title="Preview Generated Plan">
   <PlanPreviewPage guideId={id || ""} client:only="react" />
-</Layout>
+</MainLayout>

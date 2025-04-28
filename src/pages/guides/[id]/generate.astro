@@ -1,10 +1,10 @@
 ---
-import Layout from '../../../layouts/Layout.astro';
-import GuideGeneratePlanView from '../../../components/GuideGeneratePlanView';
+import MainLayout from "../../../layouts/MainLayout.astro";
+import GuideGeneratePlanView from "../../../components/GuideGeneratePlanView";
 
 const { id } = Astro.params;
 ---
 
-<Layout title="Generowanie planu wycieczki">
-  <GuideGeneratePlanView guideId={id || ''} client:load />
-</Layout> 
+<MainLayout title="Generowanie planu wycieczki">
+  <GuideGeneratePlanView guideId={id || ""} client:load />
+</MainLayout>
