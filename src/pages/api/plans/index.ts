@@ -30,8 +30,17 @@ export const GET: APIRoute = async ({ request, locals }) => {
       );
     }
 
-    // Use the specific user ID that has plans in the database
-    const userId = "9623f4ee-a3e0-4e65-adbd-9e868498e45d";
+    // Pobierz ID użytkownika z nagłówka X-User-ID lub query param user_id
+    // To tymczasowe rozwiązanie do testów
+    let userId = request.headers.get("X-User-ID") || queryParams.user_id;
+
+    // Jeśli brak ID, użyj testowego ID
+    if (!userId) {
+      userId = "57e6776e-950c-4b0c-8e14-2a9bed080d3a";
+      console.log("Using default test user ID:", userId);
+    } else {
+      console.log("Using provided user ID:", userId);
+    }
 
     // Get user plans
     const plans = await getUserPlans(supabase, userId, result.data);
@@ -64,7 +73,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     let requestBody;
     try {
       requestBody = await request.json();
-    } catch (e) {
+    } catch {
       return ApiError.validationError("Nieprawidłowy format JSON").toResponse();
     }
 
