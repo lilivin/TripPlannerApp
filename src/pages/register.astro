@@ -1,6 +1,9 @@
 ---
 import AuthLayout from "../layouts/AuthLayout.astro";
 import RegisterForm from "../components/auth/RegisterForm";
+
+// Ensure this page is server-rendered
+export const prerender = false;
 ---
 
 <AuthLayout title="Create Account | TripPlannerApp" heading="Create your account">

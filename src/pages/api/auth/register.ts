@@ -2,16 +2,10 @@ import type { APIRoute } from "astro";
 import { createSupabaseServerInstance } from "../../../db/supabase.server";
 import { z } from "zod";
 
-const registerSchema = z
-  .object({
-    email: z.string().email("Please enter a valid email address"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
-    passwordConfirm: z.string().min(6, "Password confirmation must be at least 6 characters"),
-  })
-  .refine((data) => data.password === data.passwordConfirm, {
-    message: "Passwords do not match",
-    path: ["passwordConfirm"],
-  });
+const registerSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
@@ -82,6 +76,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
     return new Response(
       JSON.stringify({
+        user: data.user,
         message: "Registration successful. Please check your email to verify your account.",
       }),
       {
