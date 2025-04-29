@@ -16,6 +16,14 @@ AI - Komunikacja z modelami przez usługę OpenAI:
 - Dostęp do szerokiej gamy modeli OpenAI, które pozwolą nam znaleźć rozwiązanie zapewniające wysoką efektywność i niskie koszta
 - Pozwala na ustawianie limitów finansowych na klucze API
 
+Testowanie - Narzędzia do kompleksowego testowania:
+- Vitest/Jest do testów jednostkowych komponentów i funkcji pomocniczych
+- React Testing Library do testowania komponentów React
+- Cypress do testów integracyjnych i end-to-end
+- Playwright do testów na różnych przeglądarkach
+- MSW (Mock Service Worker) do mockowania API
+- Lighthouse do testów wydajności, dostępności i PWA
+
 CI/CD i Hosting:
-- Github Actions do tworzenia pipeline’ów CI/CD
+- Github Actions do tworzenia pipeline'ów CI/CD
 - DigitalOcean do hostowania aplikacji za pośrednictwem obrazu docker

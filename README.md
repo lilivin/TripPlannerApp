@@ -51,6 +51,14 @@ The app's key feature is integration with OpenAI's API, which generates engaging
   - Access to a wide range of OpenAI models
   - Financial limit settings for API keys
 
+### Testing
+- **Vitest/Jest**: For unit testing components and utilities
+- **React Testing Library**: For testing React components
+- **Cypress**: For end-to-end (E2E) and integration testing
+- **Playwright**: For cross-browser testing
+- **MSW (Mock Service Worker)**: For API mocking during tests
+- **Lighthouse**: For performance, accessibility and PWA testing
+
 ### CI/CD & Hosting
 - **GitHub Actions**: For CI/CD pipelines
 - **DigitalOcean**: For application hosting via Docker image
