@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import GuideSummaryCard from "./GuideSummaryCard";
-import GeneratePlanForm from "./GeneratePlanForm";
-import useGeneratePlanForm from "./hooks/useGeneratePlanForm";
+import GeneratePlanForm from "../form/GeneratePlanForm";
+import useGeneratePlanForm from "../form/hooks/useGeneratePlanForm";
 import type { GuideDetailDto, TagDto } from "../types";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { AlertCircle, Info } from "lucide-react";

@@ -1,13 +1,13 @@
 import React from "react";
-import type { GuideDetailDto } from "@/types";
-import { useReviews } from "./hooks/useReviews";
+import { useReviews } from "../reviews/hooks/useReviews";
 import GuideHeader from "./GuideHeader";
 import GuideGallery from "./GuideGallery";
 import GuideContent from "./GuideContent";
-import TabNavigation from "./TabNavigation";
-import AttractionsList from "./AttractionsList";
-import ReviewsSection from "./ReviewsSection";
-import GeneratePlanButton from "./GeneratePlanButton";
+import TabNavigation from "../common/TabNavigation";
+import AttractionsList from "../attractions/AttractionsList";
+import ReviewsSection from "../reviews/ReviewsSection";
+import GeneratePlanButton from "../form/GeneratePlanButton";
+import type { GuideDetailDto, CreatorWithImageDto } from "../types";
 
 interface GuideDetailViewProps {
   guide: GuideDetailDto;
@@ -36,10 +36,11 @@ const GuideDetailView: React.FC<GuideDetailViewProps> = ({
   const reviewsCount = guide.reviews_count || 0;
 
   // Przygotowujemy dane twórcy z profilem
-  const creatorWithImage = {
+  const creatorWithImage: CreatorWithImageDto = {
     id: guide.creator.id,
+    name: guide.creator.name,
     display_name: guide.creator.display_name,
-    profile_image_url: null, // Zakładamy, że nie mamy pełnych danych o twórcy w tym miejscu
+    profile_image_url: guide.creator.avatar_url,
   };
 
   return (
@@ -72,7 +73,7 @@ const GuideDetailView: React.FC<GuideDetailViewProps> = ({
           {/* Zawartość zakładki z atrakcjami */}
           {activeTabIndex === 0 && (
             <AttractionsList
-              attractions={guide.attractions || []}
+              attractions={guide.attractions}
               expandedAttractions={expandedAttractions}
               onToggleExpand={toggleAttractionExpand}
             />

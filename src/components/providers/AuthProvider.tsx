@@ -1,7 +1,7 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import type { ReactNode } from "react";
-import type { UserProfileDto } from "../types";
-import { apiClient, ApiClientError } from "../lib/utils/api-client";
+import { apiClient, ApiClientError } from "@/lib/utils/api-client";
+import type { UserProfileDto } from "@/types";
 
 interface User {
   id: string;

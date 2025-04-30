@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle, RefreshCw } from "@/components/ui/icons";
 import GuidesFiltersPanel from "./GuidesFiltersPanel";
 import GuidesList from "./GuidesList";
-import { AuthProvider } from "./AuthProvider";
 import { apiClient, ApiClientError } from "@/lib/utils/api-client";
+import { AuthProvider } from "../providers/AuthProvider";
 
 // Error types for better error handling
 type ErrorType = "network" | "server" | "notFound" | "unknown" | "auth";

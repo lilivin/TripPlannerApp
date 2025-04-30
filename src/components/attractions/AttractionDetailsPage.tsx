@@ -1,9 +1,9 @@
-import React from 'react';
-import { useAttractionDetails } from '@/components/hooks/useAttractionDetails';
-import { AttractionHeader } from '@/components/AttractionHeader';
-import { AttractionGallery } from '@/components/AttractionGallery';
-import { AttractionInfoPanel } from '@/components/AttractionInfoPanel';
-import { Card, CardContent } from '@/components/ui/card';
+import React from "react";
+import { useAttractionDetails } from "@/components/hooks/useAttractionDetails";
+import { AttractionHeader } from "./AttractionHeader";
+import { AttractionGallery } from "./AttractionGallery";
+import { AttractionInfoPanel } from "./AttractionInfoPanel";
+import { Card, CardContent } from "../ui/card";
 
 interface AttractionDetailsPageProps {
   attractionId: string;
@@ -49,10 +49,7 @@ export function AttractionDetailsPage({ attractionId }: AttractionDetailsPagePro
           <CardContent className="p-6">
             <h2 className="text-xl font-bold text-red-600 mb-2">Error</h2>
             <p className="mb-4">{error.message}</p>
-            <button 
-              onClick={handleBack}
-              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md"
-            >
+            <button onClick={handleBack} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md">
               Go Back
             </button>
           </CardContent>
@@ -69,10 +66,7 @@ export function AttractionDetailsPage({ attractionId }: AttractionDetailsPagePro
           <CardContent className="p-6">
             <h2 className="text-xl font-bold mb-2">No Data</h2>
             <p className="mb-4">No attraction data available</p>
-            <button 
-              onClick={handleBack}
-              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md"
-            >
+            <button onClick={handleBack} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md">
               Go Back
             </button>
           </CardContent>
@@ -83,15 +77,12 @@ export function AttractionDetailsPage({ attractionId }: AttractionDetailsPagePro
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <AttractionHeader 
-        name={data.name} 
-        onBack={handleBack} 
-      />
-      
+      <AttractionHeader name={data.name} onBack={handleBack} />
+
       <div className="mt-8 space-y-8">
         {/* Gallery Section */}
         <AttractionGallery images={data.images} />
-        
+
         {/* Description Section */}
         <Card>
           <CardContent className="p-6">
@@ -99,7 +90,7 @@ export function AttractionDetailsPage({ attractionId }: AttractionDetailsPagePro
             <p className="text-gray-700">{data.description}</p>
           </CardContent>
         </Card>
-        
+
         {/* Info Panel */}
         <AttractionInfoPanel
           address={data.address}
@@ -112,4 +103,4 @@ export function AttractionDetailsPage({ attractionId }: AttractionDetailsPagePro
       </div>
     </div>
   );
-} 
+}

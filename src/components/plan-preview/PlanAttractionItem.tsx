@@ -2,11 +2,9 @@ import { useState } from "react";
 import { type PlanAttractionViewModel } from "./hooks/usePlanPreview";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { MapPin, Clock, Trash2, Edit2, Grip, ArrowDown } from "lucide-react";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import AttractionActions from "./AttractionActions";
-import AttractionNotes from "./AttractionNotes";
+import { MapPin, Clock, Grip, ArrowDown } from "lucide-react";
+import AttractionActions from "../attractions/AttractionActions";
+import AttractionNotes from "../attractions/AttractionNotes";
 
 interface PlanAttractionItemProps {
   attraction: PlanAttractionViewModel;
@@ -44,7 +42,7 @@ export default function PlanAttractionItem({
       const ampm = hour >= 12 ? "PM" : "AM";
       const formattedHour = hour % 12 || 12;
       return `${formattedHour}:${minutes} ${ampm}`;
-    } catch (_) {
+    } catch {
       return time;
     }
   };
@@ -121,17 +119,14 @@ export default function PlanAttractionItem({
               {attraction.transportToNext.mode.charAt(0).toUpperCase() + attraction.transportToNext.mode.slice(1)} -{" "}
               {formatDuration(attraction.transportToNext.duration)}
             </span>
-            {attraction.transportToNext.description && (
-              <span className="ml-1">{attraction.transportToNext.description}</span>
-            )}
           </div>
         )}
 
         {/* Notes section */}
-        {(attraction.note || isEditingNote) && (
+        {(attraction.notes || isEditingNote) && (
           <div className="mt-2 pt-2 border-t">
             <AttractionNotes
-              note={attraction.note}
+              note={attraction.notes || ""}
               onNoteChange={onNoteChange}
               isEditing={isEditingNote}
               onEditingToggle={() => setIsEditingNote(!isEditingNote)}
@@ -141,7 +136,7 @@ export default function PlanAttractionItem({
       </div>
 
       {/* Actions */}
-      <AttractionActions onRemove={onRemove} onEditNote={() => setIsEditingNote(true)} hasNote={!!attraction.note} />
+      <AttractionActions onRemove={onRemove} onEditNote={() => setIsEditingNote(true)} hasNote={!!attraction.notes} />
     </div>
   );
 }

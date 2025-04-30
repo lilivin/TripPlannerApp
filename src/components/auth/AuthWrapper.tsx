@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { AuthProvider } from "./AuthProvider";
+import { AuthProvider } from "../providers/AuthProvider";
 
 interface AuthWrapperProps {
   children: ReactNode;

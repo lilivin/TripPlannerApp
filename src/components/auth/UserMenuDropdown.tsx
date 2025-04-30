@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useAuth } from "../AuthProvider";
+import { useAuth } from "../providers/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { LogOut, User, Map } from "lucide-react";
 

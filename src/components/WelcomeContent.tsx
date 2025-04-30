@@ -1,4 +1,4 @@
-import { useAuth, AuthProvider } from "./AuthProvider";
+import { useAuth, AuthProvider } from "./providers/AuthProvider";
 
 function WelcomePageContent() {
   const { user } = useAuth();

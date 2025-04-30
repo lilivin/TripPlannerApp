@@ -1,14 +1,14 @@
-import React from 'react';
+import React from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import DaysInput from './DaysInput';
-import TimeRangeInput from './TimeRangeInput';
-import TagsSelectInput from './TagsSelectInput';
-import TransportationModeSelect from './TransportationModeSelect';
-import MealsToggle from './MealsToggle';
-import LoadingOverlay from './LoadingOverlay';
-import type { TagDto } from '../types';
-import type { GeneratePlanFormData, GeneratePlanFormErrors } from '../types/plan';
+import DaysInput from "./DaysInput";
+import TimeRangeInput from "./TimeRangeInput";
+import TagsSelectInput from "./TagsSelectInput";
+import TransportationModeSelect from "./TransportationModeSelect";
+import MealsToggle from "./MealsToggle";
+import LoadingOverlay from "../common/LoadingOverlay";
+import type { TagDto } from "../types";
+import type { GeneratePlanFormData, GeneratePlanFormErrors } from "../../types/plan";
 
 interface GeneratePlanFormProps {
   guideId: string;
@@ -39,63 +39,59 @@ const GeneratePlanForm: React.FC<GeneratePlanFormProps> = ({
   return (
     <>
       <LoadingOverlay isVisible={isLoading} />
-      
+
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="text-xl">Parametry generowania planu</CardTitle>
         </CardHeader>
-        
+
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-6">
             {/* Days Input */}
-            <DaysInput 
-              value={formData.days} 
-              onChange={(value) => updateField('days', value)}
-              error={errors.days}
-            />
-            
+            <DaysInput value={formData.days} onChange={(value) => updateField("days", value)} error={errors.days} />
+
             {/* Time Range Input */}
-            <TimeRangeInput 
+            <TimeRangeInput
               startTime={formData.preferences.start_time}
               endTime={formData.preferences.end_time}
-              onStartTimeChange={(value) => updatePreference('start_time', value)}
-              onEndTimeChange={(value) => updatePreference('end_time', value)}
+              onStartTimeChange={(value) => updatePreference("start_time", value)}
+              onEndTimeChange={(value) => updatePreference("end_time", value)}
               startError={errors.start_time}
               endError={errors.end_time}
               rangeError={errors.timeRange}
             />
-            
+
             {/* Include Tags */}
-            <TagsSelectInput 
+            <TagsSelectInput
               availableTags={availableTags}
               selectedTagIds={formData.preferences.include_tags}
-              onChange={(value) => updatePreference('include_tags', value)}
+              onChange={(value) => updatePreference("include_tags", value)}
               label="Atrakcje do uwzględnienia"
               placeholder="Wyszukaj tagi atrakcji, które chcesz uwzględnić..."
             />
-            
+
             {/* Exclude Tags */}
-            <TagsSelectInput 
+            <TagsSelectInput
               availableTags={availableTags}
               selectedTagIds={formData.preferences.exclude_tags}
-              onChange={(value) => updatePreference('exclude_tags', value)}
+              onChange={(value) => updatePreference("exclude_tags", value)}
               label="Atrakcje do wykluczenia"
               placeholder="Wyszukaj tagi atrakcji, które chcesz wykluczyć..."
             />
-            
+
             {/* Transportation Mode */}
-            <TransportationModeSelect 
+            <TransportationModeSelect
               value={formData.preferences.transportation_mode}
-              onChange={(value) => updatePreference('transportation_mode', value)}
+              onChange={(value) => updatePreference("transportation_mode", value)}
               error={errors.transportation_mode}
             />
-            
+
             {/* Meals Toggle */}
-            <MealsToggle 
+            <MealsToggle
               value={formData.preferences.include_meals}
-              onChange={(value) => updatePreference('include_meals', value)}
+              onChange={(value) => updatePreference("include_meals", value)}
             />
-            
+
             {/* General error */}
             {errors.general && (
               <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-md text-sm">
@@ -103,13 +99,9 @@ const GeneratePlanForm: React.FC<GeneratePlanFormProps> = ({
               </div>
             )}
           </CardContent>
-          
+
           <CardFooter className="flex justify-end">
-            <Button 
-              type="submit" 
-              disabled={isLoading}
-              size="lg"
-            >
+            <Button type="submit" disabled={isLoading} size="lg">
               Generuj plan
             </Button>
           </CardFooter>
@@ -119,4 +111,4 @@ const GeneratePlanForm: React.FC<GeneratePlanFormProps> = ({
   );
 };
 
-export default GeneratePlanForm; 
+export default GeneratePlanForm;

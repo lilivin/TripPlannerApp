@@ -1,6 +1,6 @@
 import React from "react";
 import UserMenuDropdown from "./UserMenuDropdown";
-import { useAuth, AuthProvider } from "../AuthProvider";
+import { useAuth, AuthProvider } from "../providers/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { UserCircle, Loader2 } from "@/components/ui/icons";
 

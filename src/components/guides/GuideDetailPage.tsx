@@ -1,7 +1,7 @@
 import React from "react";
 import { useGuideDetail } from "./hooks/useGuideDetail";
-import LoadingState from "./LoadingState";
-import ErrorState from "./ErrorState";
+import LoadingState from "../common/LoadingState";
+import ErrorState from "../common/ErrorState";
 import GuideDetailView from "./GuideDetailView";
 
 interface GuideDetailPageProps {

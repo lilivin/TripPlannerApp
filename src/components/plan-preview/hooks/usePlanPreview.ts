@@ -1,29 +1,24 @@
 import { useState, useEffect } from "react";
-import {
-  type GeneratePlanResponse,
-  type GuideMinimalDto,
-  type SavePlanFormData,
-  type CreatePlanCommand,
-} from "@/types";
+import type { GeneratePlanResponse, GuideMinimalDto, SavePlanFormData, CreatePlanCommand } from "@/types";
+import type { AttractionDto } from "../../types";
 
 // ViewModel interfaces
 export interface GeneratedPlanViewModel {
   guide: GuideMinimalDto;
-  generationParams: PlanGenerationParams;
+  generationParams: {
+    days: number;
+    preferences: {
+      include_tags?: string[];
+      exclude_tags?: string[];
+      start_time?: string;
+      end_time?: string;
+      include_meals?: boolean;
+      transportation_mode?: string;
+    };
+  };
   planDays: PlanDayViewModel[];
   aiGenerationCost: number | null;
-}
-
-export interface PlanGenerationParams {
-  days: number;
-  preferences: {
-    include_tags?: string[];
-    exclude_tags?: string[];
-    start_time?: string;
-    end_time?: string;
-    include_meals?: boolean;
-    transportation_mode?: string;
-  };
+  totalAttractions: number;
 }
 
 export interface PlanDayViewModel {
@@ -33,27 +28,83 @@ export interface PlanDayViewModel {
   attractions: PlanAttractionViewModel[];
 }
 
-export interface PlanAttractionViewModel {
-  id: string;
-  name: string;
-  description: string;
+export interface PlanAttractionViewModel extends AttractionDto {
+  notes?: string;
+  visitDuration: number;
   startTime: string;
   endTime: string;
-  visitDuration: number; // w minutach
   address: string;
-  geolocation?: {
-    latitude: number;
-    longitude: number;
+  transportToNext?: {
+    mode: string;
+    duration: number;
+    distance: number;
   };
-  imageUrl?: string;
-  note: string;
-  transportToNext?: TransportInfoViewModel;
 }
 
 export interface TransportInfoViewModel {
   mode: string;
   duration: number; // w minutach
   description?: string;
+}
+
+interface ApiAttraction {
+  id: string;
+  name: string;
+  description: string;
+  imageUrl: string;
+  location: {
+    lat: number;
+    lng: number;
+  };
+  note: string;
+  visitDuration: number;
+  startTime: string;
+  endTime: string;
+  address: string;
+  transportToNext?: {
+    mode: string;
+    duration: number;
+    distance: number;
+  };
+}
+
+interface ApiDay {
+  id?: string;
+  date?: string;
+  dayNumber: number;
+  attractions: ApiAttraction[];
+}
+
+interface ApiContent {
+  days: ApiDay[];
+  summary?: string;
+}
+
+interface PlanApiResponse {
+  days: {
+    dayNumber: number;
+    attractions: {
+      id: string;
+      name: string;
+      description: string;
+      imageUrl: string;
+      location: {
+        lat: number;
+        lng: number;
+      };
+      note: string;
+      visitDuration: number;
+      startTime: string;
+      endTime: string;
+      address: string;
+      transportToNext?: {
+        mode: string;
+        duration: number;
+        distance: number;
+      };
+    }[];
+  }[];
+  aiGenerationCost: number | null;
 }
 
 export function usePlanPreview(guideId: string, generationResponse: GeneratePlanResponse) {
@@ -104,70 +155,47 @@ export function usePlanPreview(guideId: string, generationResponse: GeneratePlan
 
   // Function to map API response to our view model
   const mapResponseToViewModel = (response: GeneratePlanResponse, guide: GuideMinimalDto): GeneratedPlanViewModel => {
-    // This is where we parse the JSON content from the API
-    // and map it to our strongly typed view model
-    const content = response.content as any;
-    const generationParams = response.generation_params as any;
+    const content = response.content as unknown as { days: ApiDay[] };
+    const generationParams = response.generation_params as {
+      days: number;
+      preferences: {
+        include_tags?: string[];
+        exclude_tags?: string[];
+        start_time?: string;
+        end_time?: string;
+        include_meals?: boolean;
+        transportation_mode?: string;
+      };
+    };
 
-    console.log("Generation Response:", response);
-    console.log("Guide:", guide);
-    console.log("Content from API:", content);
-    console.log("Content days:", content.days);
-    console.log("Generation Params:", generationParams);
-
-    // Sprawdzam czy mamy poprawną strukturę, a jeśli nie - próbujemy naprawić
-    let daysArray = [];
-    if (content && typeof content === "object") {
-      if (Array.isArray(content.days) && content.days.length > 0) {
-        daysArray = content.days;
-      } else if (Array.isArray(content) && content.length > 0) {
-        // Może sam content jest tablicą dni
-        daysArray = content;
-        console.log("Content jest tablicą, traktujemy jako dni:", daysArray);
-      } else if (typeof content === "object" && !Array.isArray(content) && !content.days) {
-        // Może content to obiekt, który sam jest dniem
-        daysArray = [content];
-        console.log("Content jest obiektem, traktujemy jako jeden dzień:", daysArray);
-      } else if (Array.isArray(content.days) && content.days.length === 0 && content.summary) {
-        // Jeśli mamy pusty days array, ale mamy summary, spróbujmy wygenerować strukturę dni z tekstu
-        daysArray = parseSummaryToDays(content.summary, generationParams.days);
-        console.log("Wygenerowano strukturę dni z podsumowania:", daysArray);
-      }
+    let daysArray = content.days || [];
+    if (!Array.isArray(daysArray)) {
+      daysArray = [];
     }
-
-    console.log("Final days array:", daysArray);
 
     return {
       guide,
-      generationParams: {
-        days: generationParams.days,
-        preferences: generationParams.preferences || {},
-      },
-      planDays: (daysArray || []).map((day: any, index: number) => ({
+      generationParams,
+      planDays: daysArray.map((day: ApiDay, index: number) => ({
         id: day.id || `day-${index + 1}`,
         date: day.date || new Date(Date.now() + index * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
         dayNumber: index + 1,
-        attractions: (day.attractions || []).map((attraction: any) => ({
-          id: attraction.id || `attraction-${Math.random().toString(36).substring(2, 9)}`,
-          name: attraction.name || "",
-          description: attraction.description || "",
-          startTime: attraction.start_time || "",
-          endTime: attraction.end_time || "",
-          visitDuration: attraction.visit_duration || 0,
-          address: attraction.address || "",
-          geolocation: attraction.geolocation,
-          imageUrl: attraction.image_url,
-          note: attraction.note || "",
-          transportToNext: attraction.transport_to_next
-            ? {
-                mode: attraction.transport_to_next.mode || "walking",
-                duration: attraction.transport_to_next.duration || 0,
-                description: attraction.transport_to_next.description,
-              }
-            : undefined,
+        attractions: (day.attractions || []).map((attraction: ApiAttraction) => ({
+          id: attraction.id,
+          name: attraction.name,
+          description: attraction.description,
+          imageUrl: attraction.imageUrl,
+          location: attraction.location,
+          notes: attraction.note,
+          visitDuration: attraction.visitDuration,
+          startTime: attraction.startTime,
+          endTime: attraction.endTime,
+          address: attraction.address,
+          transportToNext: attraction.transportToNext,
         })),
       })),
       aiGenerationCost: response.ai_generation_cost,
+      totalAttractions: daysArray.reduce((total: number, day: ApiDay) => total + (day.attractions?.length || 0), 0),
     };
   };
 
@@ -374,7 +402,7 @@ export function usePlanPreview(guideId: string, generationResponse: GeneratePlan
         day.id === dayId
           ? {
               ...day,
-              attractions: day.attractions.map((attr) => (attr.id === attractionId ? { ...attr, note } : attr)),
+              attractions: day.attractions.map((attr) => (attr.id === attractionId ? { ...attr, notes: note } : attr)),
             }
           : day
       ),
@@ -400,14 +428,14 @@ export function usePlanPreview(guideId: string, generationResponse: GeneratePlan
           end_time: attr.endTime,
           visit_duration: attr.visitDuration,
           address: attr.address,
-          geolocation: attr.geolocation,
+          location: attr.location,
           image_url: attr.imageUrl,
-          note: attr.note,
+          notes: attr.notes,
           transport_to_next: attr.transportToNext
             ? {
                 mode: attr.transportToNext.mode,
                 duration: attr.transportToNext.duration,
-                description: attr.transportToNext.description,
+                distance: attr.transportToNext.distance,
               }
             : null,
         })),
@@ -418,7 +446,7 @@ export function usePlanPreview(guideId: string, generationResponse: GeneratePlan
         name: formData.name,
         guide_id: guideId,
         content: { days: planContent },
-        generation_params: planViewModel.generationParams,
+        generation_params: planViewModel.generationParams as Record<string, unknown>,
         is_favorite: formData.isFavorite,
       };
 
