@@ -46,15 +46,44 @@ const LoginForm: React.FC = () => {
 
     // Validate all fields
     let isValid = true;
-    (Object.keys(formData) as (keyof LoginFormData)[]).forEach((field) => {
-      const fieldIsValid = validateField(field, formData[field]);
-      if (!fieldIsValid) isValid = false;
-    });
+    const newErrors: FormErrors = {};
+
+    // Validate email
+    if (!formData.email) {
+      newErrors.email = "Please enter a valid email address";
+      isValid = false;
+    } else {
+      try {
+        loginSchema.shape.email.parse(formData.email);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          newErrors.email = error.errors[0]?.message;
+          isValid = false;
+        }
+      }
+    }
+
+    // Validate password
+    if (!formData.password) {
+      newErrors.password = "Password must be at least 6 characters";
+      isValid = false;
+    } else {
+      try {
+        loginSchema.shape.password.parse(formData.password);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          newErrors.password = error.errors[0]?.message;
+          isValid = false;
+        }
+      }
+    }
+
+    // Update error state
+    setErrors(newErrors);
 
     if (!isValid) return;
 
     setIsLoading(true);
-    setErrors({});
 
     try {
       const response = await fetch("/api/auth/login", {
@@ -65,10 +94,11 @@ const LoginForm: React.FC = () => {
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || "Failed to login");
+        setErrors({
+          root: "Invalid email or password",
+        });
+        return;
       }
 
       // Success - redirect to home page
@@ -84,7 +114,7 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6" data-testid="login-form" noValidate>
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-gray-700">
           Email address
@@ -95,15 +125,21 @@ const LoginForm: React.FC = () => {
             name="email"
             type="email"
             autoComplete="email"
-            required
             value={formData.email}
             onChange={handleChange}
             className={`block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
               errors.email ? "border-red-300" : ""
             }`}
             disabled={isLoading}
+            data-testid="email-input"
+            aria-invalid={!!errors.email}
+            aria-describedby={errors.email ? "email-error" : undefined}
           />
-          {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+          {errors.email && (
+            <p className="mt-1 text-sm text-red-600" data-testid="email-error" id="email-error">
+              {errors.email}
+            </p>
+          )}
         </div>
       </div>
 
@@ -117,28 +153,38 @@ const LoginForm: React.FC = () => {
             name="password"
             type="password"
             autoComplete="current-password"
-            required
             value={formData.password}
             onChange={handleChange}
             className={`block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
               errors.password ? "border-red-300" : ""
             }`}
             disabled={isLoading}
+            data-testid="password-input"
+            aria-invalid={!!errors.password}
+            aria-describedby={errors.password ? "password-error" : undefined}
           />
-          {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+          {errors.password && (
+            <p className="mt-1 text-sm text-red-600" data-testid="password-error" id="password-error">
+              {errors.password}
+            </p>
+          )}
         </div>
       </div>
 
       <div className="flex items-center justify-between">
         <div className="text-sm">
-          <a href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
+          <a
+            href="/forgot-password"
+            className="font-medium text-indigo-600 hover:text-indigo-500"
+            data-testid="forgot-password-link"
+          >
             Forgot your password?
           </a>
         </div>
       </div>
 
       {errors.root && (
-        <div className="rounded-md bg-red-50 p-4">
+        <div className="rounded-md bg-red-50 p-4" data-testid="login-error-message">
           <div className="flex">
             <div className="text-sm text-red-700">{errors.root}</div>
           </div>
@@ -150,6 +196,7 @@ const LoginForm: React.FC = () => {
           type="submit"
           className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           disabled={isLoading}
+          data-testid="login-submit-button"
         >
           {isLoading ? (
             <span className="flex items-center">
@@ -158,6 +205,7 @@ const LoginForm: React.FC = () => {
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
+                data-testid="loading-spinner"
               >
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path
@@ -177,7 +225,7 @@ const LoginForm: React.FC = () => {
       <div className="text-center">
         <span className="text-sm text-gray-500">
           Don&apos;t have an account?{" "}
-          <a href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+          <a href="/register" className="font-medium text-indigo-600 hover:text-indigo-500" data-testid="register-link">
             Register
           </a>
         </span>
