@@ -50,6 +50,8 @@ jobs:
         env:
           BASE_URL: http://localhost:3000
           CI: true
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           
       - name: Upload Playwright test results
         if: always()
