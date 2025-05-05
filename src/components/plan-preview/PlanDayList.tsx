@@ -32,7 +32,7 @@ export default function PlanDayList({
         month: "long",
         day: "numeric",
       });
-    } catch (_) {
+    } catch {
       return dateString;
     }
   };

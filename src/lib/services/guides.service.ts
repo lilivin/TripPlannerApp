@@ -4,7 +4,6 @@ import type {
   GuideListResponse,
   GuideSummaryDto,
   GuideDetailDto,
-  CreatorMinimalDto,
   GuideAttractionDto,
   TagDto,
   UpsertGuideCommand,

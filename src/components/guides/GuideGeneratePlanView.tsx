@@ -3,7 +3,7 @@ import GuideSummaryCard from "./GuideSummaryCard";
 import GeneratePlanForm from "../form/GeneratePlanForm";
 import useGeneratePlanForm from "../form/hooks/useGeneratePlanForm";
 import type { GuideDetailDto, TagDto } from "../types";
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Info } from "lucide-react";
 
 interface GuideGeneratePlanViewProps {
@@ -179,7 +179,7 @@ const GuideGeneratePlanView = ({ guideId }: GuideGeneratePlanViewProps) => {
 
           <div className="md:col-span-4">
             <GeneratePlanForm
-              guideId={guideId || ""}
+              _guideId={guideId || ""}
               availableTags={tags}
               onSubmit={handleSubmit}
               isLoading={formHook.isLoading}

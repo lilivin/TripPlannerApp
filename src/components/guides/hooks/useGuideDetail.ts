@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { GuideDetailDto } from "@/types";
 
 // Definiuję lokalnie typ ApiError, który nie jest dostępny w importowanych typach
@@ -21,7 +21,7 @@ export const useGuideDetail = (guideId: string) => {
   const [expandedAttractions, setExpandedAttractions] = useState<Record<string, boolean>>({});
 
   // Funkcja do pobierania danych
-  const fetchGuide = async () => {
+  const fetchGuide = useCallback(async () => {
     setIsLoading(true);
     try {
       const url = `/api/guides/${guideId}?include_attractions=true`;
@@ -48,7 +48,7 @@ export const useGuideDetail = (guideId: string) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [guideId]);
 
   // Funkcja przełączająca rozwinięcie atrakcji
   const toggleAttractionExpand = (attractionId: string) => {
@@ -60,7 +60,7 @@ export const useGuideDetail = (guideId: string) => {
 
   useEffect(() => {
     fetchGuide();
-  }, [guideId]);
+  }, [fetchGuide]);
 
   return {
     guide,

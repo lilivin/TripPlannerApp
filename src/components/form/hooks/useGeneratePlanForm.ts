@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import type { TagDto } from '../../types';
-import type { GeneratePlanFormData, GeneratePlanFormErrors, GeneratePlanResponse } from '../../types/plan';
+import { useState, useEffect, useCallback } from "react";
+import type { TagDto } from "../../types";
+import type { GeneratePlanFormData, GeneratePlanFormErrors, GeneratePlanResponse } from "../../types/plan";
 
-const useGeneratePlanForm = (guideId: string, availableTags: TagDto[]) => {
+const useGeneratePlanForm = (guideId: string, _availableTags: TagDto[]) => {
   // Initial form data
   const getInitialFormData = (): GeneratePlanFormData => ({
     guide_id: guideId,
@@ -10,10 +10,10 @@ const useGeneratePlanForm = (guideId: string, availableTags: TagDto[]) => {
     preferences: {
       include_tags: [],
       exclude_tags: [],
-      start_time: '09:00',
-      end_time: '18:00',
+      start_time: "09:00",
+      end_time: "18:00",
       include_meals: true,
-      transportation_mode: 'walking',
+      transportation_mode: "walking",
     },
   });
 
@@ -23,16 +23,19 @@ const useGeneratePlanForm = (guideId: string, availableTags: TagDto[]) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // Field update handler
-  const updateField = (field: string, value: any) => {
-    setFormData((prev) => ({
+  const updateField = (field: keyof GeneratePlanFormData, value: GeneratePlanFormData[keyof GeneratePlanFormData]) => {
+    setFormData((prev: GeneratePlanFormData) => ({
       ...prev,
       [field]: value,
     }));
   };
 
   // Preference update handler
-  const updatePreference = (field: string, value: any) => {
-    setFormData((prev) => ({
+  const updatePreference = (
+    field: keyof GeneratePlanFormData["preferences"],
+    value: GeneratePlanFormData["preferences"][keyof GeneratePlanFormData["preferences"]]
+  ) => {
+    setFormData((prev: GeneratePlanFormData) => ({
       ...prev,
       preferences: {
         ...prev.preferences,
@@ -47,7 +50,7 @@ const useGeneratePlanForm = (guideId: string, availableTags: TagDto[]) => {
 
     // Validate days
     if (!formData.days || formData.days < 1 || formData.days > 30 || !Number.isInteger(formData.days)) {
-      newErrors.days = 'Liczba dni musi być liczbą całkowitą od 1 do 30';
+      newErrors.days = "Liczba dni musi być liczbą całkowitą od 1 do 30";
     }
 
     // Validate time range
@@ -55,28 +58,28 @@ const useGeneratePlanForm = (guideId: string, availableTags: TagDto[]) => {
     const endTime = formData.preferences.end_time;
 
     if (!startTime || !/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(startTime)) {
-      newErrors.start_time = 'Nieprawidłowy format czasu';
+      newErrors.start_time = "Nieprawidłowy format czasu";
     }
 
     if (!endTime || !/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(endTime)) {
-      newErrors.end_time = 'Nieprawidłowy format czasu';
+      newErrors.end_time = "Nieprawidłowy format czasu";
     }
 
     if (startTime && endTime) {
-      const [startHour, startMinute] = startTime.split(':').map(Number);
-      const [endHour, endMinute] = endTime.split(':').map(Number);
-      
+      const [startHour, startMinute] = startTime.split(":").map(Number);
+      const [endHour, endMinute] = endTime.split(":").map(Number);
+
       const startMinutes = startHour * 60 + startMinute;
       const endMinutes = endHour * 60 + endMinute;
-      
+
       if (endMinutes <= startMinutes) {
-        newErrors.timeRange = 'Godzina zakończenia musi być późniejsza niż godzina rozpoczęcia';
+        newErrors.timeRange = "Godzina zakończenia musi być późniejsza niż godzina rozpoczęcia";
       }
     }
 
     // Validate transportation mode
-    if (!['walking', 'public_transport', 'car', 'bicycle'].includes(formData.preferences.transportation_mode)) {
-      newErrors.transportation_mode = 'Nieprawidłowy środek transportu';
+    if (!["walking", "public_transport", "car", "bicycle"].includes(formData.preferences.transportation_mode)) {
+      newErrors.transportation_mode = "Nieprawidłowy środek transportu";
     }
 
     setErrors(newErrors);
@@ -91,23 +94,23 @@ const useGeneratePlanForm = (guideId: string, availableTags: TagDto[]) => {
 
     setIsLoading(true);
     try {
-      const response = await fetch('/api/plans/generate', {
-        method: 'POST',
+      const response = await fetch("/api/plans/generate", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
-      
+
       return await response.json();
     } catch (error) {
-      console.error('Błąd podczas generowania planu:', error);
-      setErrors({ general: error instanceof Error ? error.message : 'Wystąpił błąd podczas generowania planu' });
+      console.error("Błąd podczas generowania planu:", error);
+      setErrors({ general: error instanceof Error ? error.message : "Wystąpił błąd podczas generowania planu" });
       return null;
     } finally {
       setIsLoading(false);
@@ -116,16 +119,16 @@ const useGeneratePlanForm = (guideId: string, availableTags: TagDto[]) => {
 
   // LocalStorage handling
   const localStorageKey = `plan_form_${guideId}`;
-  
-  const saveToLocalStorage = () => {
+
+  const saveToLocalStorage = useCallback(() => {
     try {
       localStorage.setItem(localStorageKey, JSON.stringify(formData));
     } catch (error) {
-      console.error('Błąd podczas zapisywania do localStorage:', error);
+      console.error("Błąd podczas zapisywania do localStorage:", error);
     }
-  };
-  
-  const loadFromLocalStorage = () => {
+  }, [formData, localStorageKey]);
+
+  const loadFromLocalStorage = useCallback(() => {
     try {
       const saved = localStorage.getItem(localStorageKey);
       if (saved) {
@@ -133,18 +136,18 @@ const useGeneratePlanForm = (guideId: string, availableTags: TagDto[]) => {
         setFormData(parsedData);
       }
     } catch (error) {
-      console.error('Błąd podczas ładowania z localStorage:', error);
+      console.error("Błąd podczas ładowania z localStorage:", error);
     }
-  };
+  }, [localStorageKey]);
 
   // Effects
   useEffect(() => {
     loadFromLocalStorage();
-  }, [guideId]);
-  
+  }, [guideId, loadFromLocalStorage]);
+
   useEffect(() => {
     saveToLocalStorage();
-  }, [formData]);
+  }, [formData, saveToLocalStorage]);
 
   return {
     formData,
@@ -153,8 +156,8 @@ const useGeneratePlanForm = (guideId: string, availableTags: TagDto[]) => {
     updateField,
     updatePreference,
     validateForm,
-    submitForm
+    submitForm,
   };
 };
 
-export default useGeneratePlanForm; 
+export default useGeneratePlanForm;

@@ -10,7 +10,7 @@ type CacheMap<T> = Map<string, CacheItem<T>>;
  */
 export class ResponseCache {
   private static instance: ResponseCache;
-  private caches = new Map<string, CacheMap<any>>();
+  private caches = new Map<string, CacheMap<unknown>>();
 
   /**
    * Get singleton instance of the cache

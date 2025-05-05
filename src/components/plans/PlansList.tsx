@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import type { PlanSummaryDto } from "../../types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -169,15 +169,42 @@ function usePlansOfflineStatus(plans: PlanSummaryViewModel[]) {
   const [offlineStatuses, setOfflineStatuses] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [retryCount, setRetryCount] = useState(0);
+  const [_retryCount, setRetryCount] = useState(0);
+  const prevPlanIdsRef = useRef<string[]>([]);
+  const initialLoadDoneRef = useRef(false);
+  const lastFetchTimestampRef = useRef(0);
+
+  // Memoize the current plan IDs to use in effect dependency
+  const currentPlanIds = useMemo(() => plans.map((plan) => plan.id).filter(Boolean) as string[], [plans]);
 
   // Function to fetch offline status for multiple plans
-  const fetchOfflineStatuses = async () => {
+  const fetchOfflineStatuses = useCallback(async () => {
     if (plans.length === 0) {
       setOfflineStatuses({});
       setIsLoading(false);
+      initialLoadDoneRef.current = true;
       return;
     }
+
+    // Skip if already loading to prevent duplicate requests
+    if (isLoading) return;
+
+    // Check if the plan IDs are the same (avoid unnecessary fetches)
+    const hasPlansChanged =
+      prevPlanIdsRef.current.length !== currentPlanIds.length ||
+      prevPlanIdsRef.current.some((id, index) => id !== currentPlanIds[index]);
+
+    // Skip if plan IDs haven't changed and this is not a manual retry
+    // Only skip if we've done the initial load
+    if (initialLoadDoneRef.current && !hasPlansChanged && _retryCount === 0) {
+      console.log("Skipping fetch - no changes to plan IDs");
+      return;
+    }
+
+    console.log("Fetching offline statuses for plans:", currentPlanIds);
+
+    // Update the previous plan IDs ref
+    prevPlanIdsRef.current = [...currentPlanIds];
 
     setIsLoading(true);
     setError(null);
@@ -197,13 +224,11 @@ function usePlansOfflineStatus(plans: PlanSummaryViewModel[]) {
             const timeoutId = setTimeout(() => controller.abort(), 5000);
 
             try {
-              // Dla testów wypisz URL zapytania do konsoli
               console.log(`Fetching offline status for plan ID: ${plan.id}`);
 
               const response = await fetch(`/api/plans/${plan.id}/offline`, {
                 signal: controller.signal,
                 headers: {
-                  // Dodaj header z ID użytkownika dla autoryzacji
                   "X-User-ID": "57e6776e-950c-4b0c-8e14-2a9bed080d3a",
                 },
               });
@@ -237,7 +262,15 @@ function usePlansOfflineStatus(plans: PlanSummaryViewModel[]) {
         }
       });
 
-      setOfflineStatuses(statuses);
+      // Only update state if there are differences
+      const shouldUpdate =
+        Object.keys(statuses).length > 0 &&
+        (Object.keys(offlineStatuses).length !== Object.keys(statuses).length ||
+          Object.entries(statuses).some(([id, status]) => offlineStatuses[id] !== status));
+
+      if (shouldUpdate) {
+        setOfflineStatuses(statuses);
+      }
 
       // Check if we have missing statuses for any plans
       const missingStatuses = plans.some((plan) => plan.id && statuses[plan.id] === undefined);
@@ -250,18 +283,43 @@ function usePlansOfflineStatus(plans: PlanSummaryViewModel[]) {
       setError("Failed to load offline availability status");
     } finally {
       setIsLoading(false);
+      initialLoadDoneRef.current = true;
     }
-  };
+  }, [_retryCount, currentPlanIds]);
 
   // Function to retry fetching
   const retryFetch = () => {
     setRetryCount((prev) => prev + 1);
   };
 
+  // Only run this effect once on mount to clear state
+  useEffect(() => {
+    return () => {
+      // Reset everything when component unmounts
+      initialLoadDoneRef.current = false;
+      prevPlanIdsRef.current = [];
+    };
+  }, []);
+
   // Fetch statuses when plans change or when retry is triggered
   useEffect(() => {
-    fetchOfflineStatuses();
-  }, [plans, retryCount]);
+    // Prevent multiple fetches within a short timeframe (1 second)
+    const now = Date.now();
+    const timeSinceLastFetch = now - lastFetchTimestampRef.current;
+
+    if (timeSinceLastFetch < 1000 && initialLoadDoneRef.current) {
+      console.log("Debouncing fetch - too soon since last fetch", timeSinceLastFetch);
+      return;
+    }
+
+    // Debounce multiple API calls
+    const debounceTimer = setTimeout(() => {
+      lastFetchTimestampRef.current = Date.now();
+      fetchOfflineStatuses();
+    }, 1000); // Increased debounce time to 1 second
+
+    return () => clearTimeout(debounceTimer);
+  }, [fetchOfflineStatuses]);
 
   return {
     offlineStatuses,

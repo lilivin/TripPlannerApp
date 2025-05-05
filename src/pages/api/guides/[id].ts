@@ -2,7 +2,7 @@ import type { APIRoute, APIContext } from "astro";
 import { guidesService } from "../../../lib/services/guides.service";
 import { guideIdSchema, guideQuerySchema } from "../../../schemas/guides.schema";
 import { ApiError } from "../../../lib/utils/api-response";
-import { createSuccessResponse, createErrorResponse } from "../../../lib/utils/api-response";
+import { createErrorResponse } from "../../../lib/utils/api-response";
 import { ResponseCache } from "../../../lib/cache/response-cache";
 
 export const prerender = false;

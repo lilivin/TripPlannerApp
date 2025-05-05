@@ -1,6 +1,6 @@
-import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import type { Json } from '@/db/database.types';
+import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import type { Json } from "@/db/database.types";
 
 interface AttractionInfoPanelProps {
   address: string;
@@ -21,35 +21,25 @@ export function AttractionInfoPanel({
   contactInfo,
   ticketPriceInfo,
   accessibilityInfo,
-  averageVisitTimeMinutes
+  averageVisitTimeMinutes,
 }: AttractionInfoPanelProps) {
   return (
     <div className="my-8">
       <h2 className="text-2xl font-semibold mb-4">Practical Information</h2>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <AddressSection address={address} />
-        
-        {openingHours && (
-          <OpeningHoursSection openingHours={openingHours} />
-        )}
-        
-        {contactInfo && (
-          <ContactInfoSection contactInfo={contactInfo} />
-        )}
-        
+
+        {openingHours && <OpeningHoursSection openingHours={openingHours} />}
+
+        {contactInfo && <ContactInfoSection contactInfo={contactInfo} />}
+
         <div className="space-y-6">
-          {ticketPriceInfo && (
-            <TicketInfoSection ticketPriceInfo={ticketPriceInfo} />
-          )}
-          
-          {accessibilityInfo && (
-            <AccessibilityInfoSection accessibilityInfo={accessibilityInfo} />
-          )}
-          
-          {averageVisitTimeMinutes && (
-            <VisitTimeSection averageVisitTimeMinutes={averageVisitTimeMinutes} />
-          )}
+          {ticketPriceInfo && <TicketInfoSection ticketPriceInfo={ticketPriceInfo} />}
+
+          {accessibilityInfo && <AccessibilityInfoSection accessibilityInfo={accessibilityInfo} />}
+
+          {averageVisitTimeMinutes && <VisitTimeSection averageVisitTimeMinutes={averageVisitTimeMinutes} />}
         </div>
       </div>
     </div>
@@ -81,22 +71,20 @@ function OpeningHoursSection({ openingHours }: OpeningHoursSectionProps) {
   // Parse openingHours based on expected format
   // This is a simple implementation, adjust based on actual data structure
   const hoursData = openingHours as Record<string, { open: string; close: string } | null>;
-  
-  const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  
+
+  const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
   return (
     <Card>
       <CardContent className="pt-6">
         <h3 className="text-lg font-medium mb-2">Opening Hours</h3>
         <ul className="space-y-1">
-          {daysOfWeek.map(day => {
+          {daysOfWeek.map((day) => {
             const dayData = hoursData[day.toLowerCase()];
             return (
               <li key={day} className="flex justify-between">
                 <span>{day}</span>
-                <span>
-                  {dayData ? `${dayData.open} - ${dayData.close}` : 'Closed'}
-                </span>
+                <span>{dayData ? `${dayData.open} - ${dayData.close}` : "Closed"}</span>
               </li>
             );
           })}
@@ -119,7 +107,7 @@ function ContactInfoSection({ contactInfo }: ContactInfoSectionProps) {
     email?: string;
     website?: string;
   };
-  
+
   return (
     <Card>
       <CardContent className="pt-6">
@@ -133,7 +121,7 @@ function ContactInfoSection({ contactInfo }: ContactInfoSectionProps) {
               </a>
             </div>
           )}
-          
+
           {contactData.email && (
             <div className="flex items-center gap-2">
               <span className="text-gray-600">Email:</span>
@@ -142,7 +130,7 @@ function ContactInfoSection({ contactInfo }: ContactInfoSectionProps) {
               </a>
             </div>
           )}
-          
+
           {contactData.website && (
             <div className="flex items-center gap-2">
               <span className="text-gray-600">Website:</span>
@@ -198,16 +186,16 @@ function VisitTimeSection({ averageVisitTimeMinutes }: VisitTimeSectionProps) {
   // Convert minutes to hours and minutes format
   const hours = Math.floor(averageVisitTimeMinutes / 60);
   const minutes = averageVisitTimeMinutes % 60;
-  
-  let timeDisplay = '';
+
+  let timeDisplay = "";
   if (hours > 0) {
-    timeDisplay += `${hours} hour${hours > 1 ? 's' : ''}`;
+    timeDisplay += `${hours} hour${hours > 1 ? "s" : ""}`;
   }
   if (minutes > 0) {
-    if (timeDisplay) timeDisplay += ' ';
-    timeDisplay += `${minutes} minute${minutes > 1 ? 's' : ''}`;
+    if (timeDisplay) timeDisplay += " ";
+    timeDisplay += `${minutes} minute${minutes > 1 ? "s" : ""}`;
   }
-  
+
   return (
     <Card>
       <CardContent className="pt-6">
@@ -216,4 +204,4 @@ function VisitTimeSection({ averageVisitTimeMinutes }: VisitTimeSectionProps) {
       </CardContent>
     </Card>
   );
-} 
+}

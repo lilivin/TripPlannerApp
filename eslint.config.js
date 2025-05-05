@@ -20,6 +20,15 @@ const baseConfig = tseslint.config({
   rules: {
     "no-console": "warn",
     "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+        ignoreRestSiblings: true,
+      },
+    ],
+    "@typescript-eslint/no-explicit-any": "error",
   },
 });
 
@@ -31,6 +40,9 @@ const jsxA11yConfig = tseslint.config({
   },
   rules: {
     ...jsxA11y.flatConfigs.recommended.rules,
+    "jsx-a11y/click-events-have-key-events": "error",
+    "jsx-a11y/no-static-element-interactions": "error",
+    "jsx-a11y/img-redundant-alt": "error",
   },
 });
 
@@ -53,6 +65,7 @@ const reactConfig = tseslint.config({
     ...eslintPluginReactHooks.configs.recommended.rules,
     "react/react-in-jsx-scope": "off",
     "react-compiler/react-compiler": "error",
+    "react-hooks/exhaustive-deps": "warn",
   },
 });
 

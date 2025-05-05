@@ -1,5 +1,5 @@
-import React from 'react';
-import { Calendar, Lock } from 'lucide-react';
+import React from "react";
+import { Calendar, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface GeneratePlanButtonProps {
@@ -11,11 +11,7 @@ interface GeneratePlanButtonProps {
 /**
  * Komponent przycisku umożliwiającego przejście do generowania planu wycieczki
  */
-const GeneratePlanButton: React.FC<GeneratePlanButtonProps> = ({
-  guideId,
-  isPaid,
-  hasAccess
-}) => {
+const GeneratePlanButton: React.FC<GeneratePlanButtonProps> = ({ guideId, isPaid, hasAccess }) => {
   // Jeśli przewodnik jest płatny i użytkownik nie ma dostępu, wyświetl przycisk kupna
   if (isPaid && !hasAccess) {
     return (
@@ -40,7 +36,7 @@ const GeneratePlanButton: React.FC<GeneratePlanButtonProps> = ({
       size="lg"
       className="gap-2 w-full max-w-md"
       onClick={() => {
-        window.location.href = `/guides/${guideId}/generate`
+        window.location.href = `/guides/${guideId}/generate`;
       }}
     >
       <Calendar className="h-5 w-5" />
@@ -49,4 +45,4 @@ const GeneratePlanButton: React.FC<GeneratePlanButtonProps> = ({
   );
 };
 
-export default GeneratePlanButton; 
+export default GeneratePlanButton;

@@ -1,7 +1,7 @@
-import React from 'react';
+import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import type { GuideDetailDto, GuideMinimalDto } from '../types';
-import { MapPin, Calendar } from 'lucide-react';
+import type { GuideDetailDto, GuideMinimalDto } from "../types";
+import { MapPin, Calendar } from "lucide-react";
 
 // We need to extend GuideMinimalDto with the properties needed for this component
 interface ExtendedGuideMinimalDto extends GuideMinimalDto {
@@ -14,7 +14,7 @@ interface GuideSummaryCardProps {
 
 const GuideSummaryCard: React.FC<GuideSummaryCardProps> = ({ guide }) => {
   // Check if the guide is detailed (has more properties) or minimal
-  const isDetailed = 'description' in guide;
+  const isDetailed = "description" in guide;
 
   return (
     <Card className="w-full">
@@ -27,13 +27,9 @@ const GuideSummaryCard: React.FC<GuideSummaryCardProps> = ({ guide }) => {
               {guide.location_name}
             </CardDescription>
           </div>
-          {isDetailed && 'cover_image_url' in guide && guide.cover_image_url && (
+          {isDetailed && "cover_image_url" in guide && guide.cover_image_url && (
             <div className="w-20 h-20 rounded-md overflow-hidden flex-shrink-0">
-              <img 
-                src={guide.cover_image_url} 
-                alt={guide.title} 
-                className="w-full h-full object-cover"
-              />
+              <img src={guide.cover_image_url} alt={guide.title} className="w-full h-full object-cover" />
             </div>
           )}
         </div>
@@ -41,16 +37,14 @@ const GuideSummaryCard: React.FC<GuideSummaryCardProps> = ({ guide }) => {
       <CardContent>
         {isDetailed && (
           <>
-            <p className="text-sm text-muted-foreground mb-3 line-clamp-3">
-              {(guide as GuideDetailDto).description}
-            </p>
+            <p className="text-sm text-muted-foreground mb-3 line-clamp-3">{(guide as GuideDetailDto).description}</p>
             <div className="flex items-center text-sm text-muted-foreground mt-2">
               <Calendar className="h-4 w-4 mr-1.5" />
               <span>Rekomendowana liczba dni: {guide.recommended_days}</span>
             </div>
           </>
         )}
-        
+
         {!isDetailed && (
           <div className="flex items-center text-sm text-muted-foreground mt-2">
             <Calendar className="h-4 w-4 mr-1.5" />
@@ -62,4 +56,4 @@ const GuideSummaryCard: React.FC<GuideSummaryCardProps> = ({ guide }) => {
   );
 };
 
-export default GuideSummaryCard; 
+export default GuideSummaryCard;

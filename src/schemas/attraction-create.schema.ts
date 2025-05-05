@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const createAttractionSchema = z.object({
   name: z.string().min(1, "Nazwa jest wymagana").max(255),
@@ -14,4 +14,4 @@ export const createAttractionSchema = z.object({
   average_visit_time_minutes: z.number().int().positive().optional().nullable(),
   ticket_price_info: z.string().optional().nullable(),
   accessibility_info: z.string().optional().nullable(),
-}); 
+});

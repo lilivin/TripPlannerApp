@@ -12,7 +12,8 @@ interface User {
 interface AuthResponse {
   message?: string;
   user?: User;
-  [key: string]: any;
+  error?: string;
+  data?: Record<string, unknown>;
 }
 
 interface AuthContextType {

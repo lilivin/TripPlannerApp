@@ -16,8 +16,6 @@ interface AttractionDetailsPageProps {
 export function AttractionDetailsPage({ attractionId }: AttractionDetailsPageProps) {
   const { data, isLoading, error } = useAttractionDetails(attractionId);
 
-  console.log(data);
-
   // Handle the back button action
   const handleBack = () => {
     // Use browser history to go back

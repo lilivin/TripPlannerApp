@@ -30,10 +30,10 @@ import { FetchHttpClient } from "./http-client";
  */
 const defaultLogger: Logger = {
   // These methods are intentionally no-ops in production but satisfy the Logger interface
-  debug: (_message: string, ..._args: unknown[]) => {
+  debug: () => {
     /* no-op */
   },
-  info: (_message: string, ..._args: unknown[]) => {
+  info: () => {
     /* no-op */
   },
   warn: (message: string, ...args: unknown[]) => console.warn(message, ...args),

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -41,10 +41,7 @@ const TimeRangeInput: React.FC<TimeRangeInputProps> = ({
           type="time"
           value={startTime}
           onChange={handleStartTimeChange}
-          className={cn(
-            "w-full",
-            startError && "border-red-500 focus-visible:ring-red-500"
-          )}
+          className={cn("w-full", startError && "border-red-500 focus-visible:ring-red-500")}
           aria-invalid={!!startError}
           aria-describedby={startError ? "start-time-error" : undefined}
         />
@@ -64,10 +61,7 @@ const TimeRangeInput: React.FC<TimeRangeInputProps> = ({
           type="time"
           value={endTime}
           onChange={handleEndTimeChange}
-          className={cn(
-            "w-full",
-            endError && "border-red-500 focus-visible:ring-red-500"
-          )}
+          className={cn("w-full", endError && "border-red-500 focus-visible:ring-red-500")}
           aria-invalid={!!endError}
           aria-describedby={endError ? "end-time-error" : undefined}
         />
@@ -87,4 +81,4 @@ const TimeRangeInput: React.FC<TimeRangeInputProps> = ({
   );
 };
 
-export default TimeRangeInput; 
+export default TimeRangeInput;

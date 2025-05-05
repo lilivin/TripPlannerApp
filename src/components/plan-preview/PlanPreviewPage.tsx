@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { type GeneratePlanResponse, type GuideMinimalDto } from "@/types";
+import { type GeneratePlanResponse } from "@/types";
 import PlanPreviewHeader from "./PlanPreviewHeader";
 import PlanPreviewActions from "./PlanPreviewActions";
 import PlanPreviewView from "./PlanPreviewView";

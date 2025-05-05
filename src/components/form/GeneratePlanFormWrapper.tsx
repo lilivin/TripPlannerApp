@@ -1,8 +1,8 @@
-import React, { useEffect } from "react";
+import React from "react";
 import GeneratePlanForm from "./GeneratePlanForm";
 import useGeneratePlanForm from "./hooks/useGeneratePlanForm";
 import type { TagDto } from "../types";
-import type { GeneratePlanFormData, GeneratePlanResponse } from "../../types/plan";
+import type { GeneratePlanResponse } from "../../types/plan";
 
 interface GeneratePlanFormWrapperProps {
   guideId: string;
@@ -15,7 +15,7 @@ const GeneratePlanFormWrapper: React.FC<GeneratePlanFormWrapperProps> = ({ guide
   const formHook = useGeneratePlanForm(guideId, availableTags);
 
   // Handle form submission
-  const handleSubmit = async (data: GeneratePlanFormData) => {
+  const handleSubmit = async () => {
     try {
       const response = await formHook.submitForm();
 

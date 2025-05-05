@@ -1,15 +1,15 @@
-import React from 'react';
-import { 
+import React from "react";
+import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
   SelectLabel,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { TRANSPORTATION_OPTIONS } from '../types/plan';
+import { TRANSPORTATION_OPTIONS } from "../types/plan";
 
 interface TransportationModeSelectProps {
   value: string;
@@ -31,11 +31,8 @@ const TransportationModeSelect: React.FC<TransportationModeSelectProps> = ({
       <Label htmlFor="transportation-mode-select" className="font-medium">
         {label}
       </Label>
-      <Select
-        value={value}
-        onValueChange={onChange}
-      >
-        <SelectTrigger 
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger
           id="transportation-mode-select"
           className={error ? "border-red-500 focus-visible:ring-red-500" : ""}
           aria-invalid={!!error}
@@ -54,7 +51,7 @@ const TransportationModeSelect: React.FC<TransportationModeSelectProps> = ({
           </SelectGroup>
         </SelectContent>
       </Select>
-      
+
       {error && (
         <p id="transportation-error" className="text-sm text-red-500 mt-1">
           {error}
@@ -64,4 +61,4 @@ const TransportationModeSelect: React.FC<TransportationModeSelectProps> = ({
   );
 };
 
-export default TransportationModeSelect; 
+export default TransportationModeSelect;

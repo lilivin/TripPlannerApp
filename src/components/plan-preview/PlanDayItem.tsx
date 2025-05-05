@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { type PlanDayViewModel, type PlanAttractionViewModel } from "./hooks/usePlanPreview";
 import PlanAttractionItem from "./PlanAttractionItem";
 import {

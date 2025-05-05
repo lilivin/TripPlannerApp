@@ -1,4 +1,4 @@
-import type { Json } from "../db/database.types";
+import type { Json } from "../../db/database.types";
 
 export type TransportationMode = "walking" | "public_transport" | "car" | "bicycle";
 

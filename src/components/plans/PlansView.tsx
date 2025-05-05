@@ -67,21 +67,18 @@ function usePlansView() {
     return validatedFilters;
   };
 
-  // Function to fetch plans
+  // Funkcja do pobierania planów - bez useCallback
   const fetchPlans = async (skipLoading = false) => {
     if (!skipLoading) {
       setIsLoading(true);
     }
 
     try {
-      // Validate filters before using them
       const validatedFilters = validateFilters(filters);
 
       const queryParams = new URLSearchParams();
       queryParams.append("page", validatedFilters.page.toString());
       queryParams.append("limit", validatedFilters.limit.toString());
-
-      // Tymczasowo dodajemy sztywne ID użytkownika
       queryParams.append("user_id", "57e6776e-950c-4b0c-8e14-2a9bed080d3a");
 
       if (validatedFilters.isFavorite !== undefined) {
@@ -92,18 +89,16 @@ function usePlansView() {
         queryParams.append("guide_id", validatedFilters.guideId);
       }
 
+      console.log(`Fetching plans with URL: /api/plans?${queryParams.toString()}`);
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      // Dla testów wypisz URL zapytania do konsoli
-      console.log(`Fetching plans with URL: /api/plans?${queryParams.toString()}`);
 
       try {
         const response = await fetch(`/api/plans?${queryParams.toString()}`, {
           signal: controller.signal,
           headers: {
             Accept: "application/json",
-            // Dodaj header z ID użytkownika dla autoryzacji
             "X-User-ID": "57e6776e-950c-4b0c-8e14-2a9bed080d3a",
           },
         });
@@ -124,15 +119,12 @@ function usePlansView() {
 
         const data = await response.json();
 
-        // Validate response data structure
         if (!data || !Array.isArray(data.data)) {
           throw new Error("Invalid response format from server");
         }
 
-        // Transform the API response to view model
         const transformedPlans = data.data
           .map((plan: PlanSummaryDto): PlanSummaryViewModel | null => {
-            // Validate plan data
             if (!plan || !plan.id || !plan.name || !plan.guide || !plan.created_at) {
               console.error("Invalid plan data", plan);
               return null;
@@ -152,7 +144,7 @@ function usePlansView() {
               console.error("Error formatting date", err);
               return {
                 ...plan,
-                formattedDate: plan.created_at, // Fallback to raw date string
+                formattedDate: plan.created_at,
               };
             }
           })
@@ -172,8 +164,6 @@ function usePlansView() {
       } else {
         setError(err instanceof Error ? err.message : "An unknown error occurred");
       }
-
-      // Keep previous data on error
       console.error("Failed to fetch plans:", err);
     } finally {
       setIsLoading(false);
@@ -184,7 +174,6 @@ function usePlansView() {
   // Function to retry fetching plans
   const retryFetch = () => {
     setRetryCount((prev) => prev + 1);
-    fetchPlans();
   };
 
   // Function to handle filter changes
@@ -380,7 +369,7 @@ function usePlansView() {
   // Effect to fetch plans when filters change or retry is triggered
   useEffect(() => {
     fetchPlans();
-  }, [filters, retryCount]);
+  }, [filters, retryCount]); // fetchPlans nie jest już funkcją memoizowaną, więc nie musi być w zależnościach
 
   return {
     plans,

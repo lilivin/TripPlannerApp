@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,14 +13,7 @@ interface DaysInputProps {
   label?: string;
 }
 
-const DaysInput: React.FC<DaysInputProps> = ({
-  value,
-  onChange,
-  error,
-  min = 1,
-  max = 30,
-  label = "Liczba dni",
-}) => {
+const DaysInput: React.FC<DaysInputProps> = ({ value, onChange, error, min = 1, max = 30, label = "Liczba dni" }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseInt(e.target.value);
     if (!isNaN(newValue)) {
@@ -46,10 +39,10 @@ const DaysInput: React.FC<DaysInputProps> = ({
         {label}
       </Label>
       <div className="flex items-center space-x-2">
-        <Button 
-          type="button" 
-          variant="outline" 
-          size="icon" 
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
           onClick={handleDecrement}
           disabled={value <= min}
           aria-label="Zmniejsz liczbę dni"
@@ -57,7 +50,7 @@ const DaysInput: React.FC<DaysInputProps> = ({
           <span className="sr-only">Zmniejsz</span>
           <span aria-hidden="true">-</span>
         </Button>
-        
+
         <Input
           id="days-input"
           type="number"
@@ -65,18 +58,15 @@ const DaysInput: React.FC<DaysInputProps> = ({
           onChange={handleChange}
           min={min}
           max={max}
-          className={cn(
-            "text-center w-20",
-            error && "border-red-500 focus-visible:ring-red-500"
-          )}
+          className={cn("text-center w-20", error && "border-red-500 focus-visible:ring-red-500")}
           aria-invalid={!!error}
           aria-describedby={error ? "days-input-error" : undefined}
         />
-        
-        <Button 
-          type="button" 
-          variant="outline" 
-          size="icon" 
+
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
           onClick={handleIncrement}
           disabled={value >= max}
           aria-label="Zwiększ liczbę dni"
@@ -85,12 +75,9 @@ const DaysInput: React.FC<DaysInputProps> = ({
           <span aria-hidden="true">+</span>
         </Button>
       </div>
-      
+
       {error && (
-        <p 
-          id="days-input-error" 
-          className="text-sm text-red-500 mt-1"
-        >
+        <p id="days-input-error" className="text-sm text-red-500 mt-1">
           {error}
         </p>
       )}
@@ -98,4 +85,4 @@ const DaysInput: React.FC<DaysInputProps> = ({
   );
 };
 
-export default DaysInput; 
+export default DaysInput;

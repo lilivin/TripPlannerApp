@@ -8,21 +8,24 @@ import TransportationModeSelect from "./TransportationModeSelect";
 import MealsToggle from "./MealsToggle";
 import LoadingOverlay from "../common/LoadingOverlay";
 import type { TagDto } from "../types";
-import type { GeneratePlanFormData, GeneratePlanFormErrors } from "../../types/plan";
+import type { GeneratePlanFormData, GeneratePlanFormErrors } from "../types/plan";
 
 interface GeneratePlanFormProps {
-  guideId: string;
+  _guideId: string;
   availableTags: TagDto[];
   onSubmit: (data: GeneratePlanFormData) => Promise<void>;
   isLoading: boolean;
   formData: GeneratePlanFormData;
   errors: GeneratePlanFormErrors;
-  updateField: (field: string, value: any) => void;
-  updatePreference: (field: string, value: any) => void;
+  updateField: (field: keyof GeneratePlanFormData, value: GeneratePlanFormData[keyof GeneratePlanFormData]) => void;
+  updatePreference: (
+    field: keyof GeneratePlanFormData["preferences"],
+    value: GeneratePlanFormData["preferences"][keyof GeneratePlanFormData["preferences"]]
+  ) => void;
 }
 
 const GeneratePlanForm: React.FC<GeneratePlanFormProps> = ({
-  guideId,
+  _guideId,
   availableTags,
   onSubmit,
   isLoading,

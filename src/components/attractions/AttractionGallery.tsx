@@ -1,9 +1,5 @@
-import React, { useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import React, { useState } from "react";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 interface AttractionGalleryProps {
   images: string[];
@@ -38,33 +34,41 @@ export function AttractionGallery({ images }: AttractionGalleryProps) {
   return (
     <div className="my-8">
       <h2 className="text-2xl font-semibold mb-4">Gallery</h2>
-      
+
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {images.map((image, index) => (
-          <Dialog key={index} open={selectedImage === image} onOpenChange={(open) => {
-            if (!open) handleDialogClose();
-          }}>
+          <Dialog
+            key={index}
+            open={selectedImage === image}
+            onOpenChange={(open) => {
+              if (!open) handleDialogClose();
+            }}
+          >
             <DialogTrigger asChild>
-              <div 
+              <div
                 onClick={() => handleImageClick(image)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleImageClick(image);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
                 className="cursor-pointer overflow-hidden rounded-md aspect-square bg-gray-100 relative hover:opacity-90 transition-opacity"
               >
-                <img 
-                  src={image} 
-                  alt={`Attraction image ${index + 1}`}
+                <img
+                  src={image}
+                  alt={`${index + 1}`}
                   className="object-cover w-full h-full"
                   loading="lazy" // For performance optimization
                 />
               </div>
             </DialogTrigger>
-            
+
             <DialogContent className="sm:max-w-3xl max-h-[90vh] p-1">
               <div className="w-full h-full overflow-hidden flex items-center justify-center">
-                <img 
-                  src={image} 
-                  alt={`Attraction image ${index + 1}`}
-                  className="object-contain max-w-full max-h-[80vh]"
-                />
+                <img src={image} alt={`${index + 1}`} className="object-contain max-w-full max-h-[80vh]" />
               </div>
             </DialogContent>
           </Dialog>
@@ -72,4 +76,4 @@ export function AttractionGallery({ images }: AttractionGalleryProps) {
       </div>
     </div>
   );
-} 
+}

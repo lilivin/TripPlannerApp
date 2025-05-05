@@ -1,9 +1,9 @@
-import React from 'react';
-import type { ReviewDto, PaginationInfo } from '@/types';
-import { AlertCircle, MessagesSquare } from 'lucide-react';
+import React from "react";
+import type { ReviewDto, PaginationInfo } from "@/types";
+import { MessagesSquare } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import ReviewItem from './ReviewItem';
+import ReviewItem from "./ReviewItem";
 
 interface ReviewsSectionProps {
   guideId: string;
@@ -17,23 +17,14 @@ interface ReviewsSectionProps {
 /**
  * Komponent wyświetlający listę recenzji przewodnika
  */
-const ReviewsSection: React.FC<ReviewsSectionProps> = ({
-  guideId,
-  reviewsCount,
-  reviews,
-  pagination,
-  isLoading,
-  onPageChange
-}) => {
+const ReviewsSection: React.FC<ReviewsSectionProps> = ({ reviews, pagination, isLoading, onPageChange }) => {
   // Jeśli nie ma recenzji, wyświetl odpowiedni komunikat
   if (!isLoading && (!reviews || reviews.length === 0)) {
     return (
       <Alert variant="default" className="my-6">
         <MessagesSquare className="h-5 w-5" />
         <AlertTitle className="ml-2">Brak recenzji</AlertTitle>
-        <AlertDescription className="ml-7">
-          Ten przewodnik nie ma jeszcze żadnych recenzji.
-        </AlertDescription>
+        <AlertDescription className="ml-7">Ten przewodnik nie ma jeszcze żadnych recenzji.</AlertDescription>
       </Alert>
     );
   }
@@ -42,7 +33,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
     <div className="space-y-6">
       {/* Lista recenzji */}
       <div className="space-y-4">
-        {reviews.map(review => (
+        {reviews.map((review) => (
           <ReviewItem key={review.id} review={review} />
         ))}
       </div>
@@ -59,11 +50,11 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
             >
               Poprzednia
             </Button>
-            
+
             <div className="text-sm">
               Strona {pagination.page} z {pagination.pages}
             </div>
-            
+
             <Button
               variant="outline"
               size="sm"
@@ -79,4 +70,4 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
   );
 };
 
-export default ReviewsSection; 
+export default ReviewsSection;

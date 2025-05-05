@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Image as ImageIcon, ZoomIn } from 'lucide-react';
+import React, { useState } from "react";
+import { ChevronLeft, ChevronRight, Image as ImageIcon, ZoomIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -11,7 +11,7 @@ interface GuideGalleryProps {
 /**
  * Komponent wyświetlający galerię zdjęć przewodnika
  */
-const GuideGallery: React.FC<GuideGalleryProps> = ({ images, coverImage }) => {
+const GuideGallery: React.FC<GuideGalleryProps> = ({ images }) => {
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [isZoomed, setIsZoomed] = useState<boolean>(false);
 
@@ -41,21 +41,26 @@ const GuideGallery: React.FC<GuideGalleryProps> = ({ images, coverImage }) => {
 
   return (
     <div className="relative mb-8">
-      <div 
-        className={cn(
-          "w-full overflow-hidden rounded-lg relative",
-          isZoomed ? "cursor-zoom-out" : "cursor-zoom-in"
-        )}
+      <div
+        className={cn("w-full overflow-hidden rounded-lg relative", isZoomed ? "cursor-zoom-out" : "cursor-zoom-in")}
         onClick={toggleZoom}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            toggleZoom();
+          }
+        }}
+        role="button"
+        tabIndex={0}
       >
-        <div 
+        <div
           className={cn(
             "w-full aspect-[16/9] bg-cover bg-center transition-transform duration-300",
             isZoomed && "scale-150"
           )}
           style={{ backgroundImage: `url(${images[activeIndex]})` }}
         />
-        
+
         <Button
           onClick={(e) => {
             e.stopPropagation();
@@ -71,12 +76,7 @@ const GuideGallery: React.FC<GuideGalleryProps> = ({ images, coverImage }) => {
 
       {images.length > 1 && (
         <div className="flex justify-center items-center mt-4 space-x-2">
-          <Button
-            onClick={handlePrevious}
-            size="icon"
-            variant="outline"
-            className="rounded-full h-8 w-8"
-          >
+          <Button onClick={handlePrevious} size="icon" variant="outline" className="rounded-full h-8 w-8">
             <ChevronLeft className="h-4 w-4" />
           </Button>
 
@@ -84,12 +84,7 @@ const GuideGallery: React.FC<GuideGalleryProps> = ({ images, coverImage }) => {
             {activeIndex + 1} / {images.length}
           </div>
 
-          <Button
-            onClick={handleNext}
-            size="icon"
-            variant="outline"
-            className="rounded-full h-8 w-8"
-          >
+          <Button onClick={handleNext} size="icon" variant="outline" className="rounded-full h-8 w-8">
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -102,9 +97,7 @@ const GuideGallery: React.FC<GuideGalleryProps> = ({ images, coverImage }) => {
               key={index}
               className={cn(
                 "w-16 h-16 rounded border-2 flex-shrink-0 bg-cover bg-center",
-                index === activeIndex
-                  ? "border-primary"
-                  : "border-transparent opacity-70 hover:opacity-100"
+                index === activeIndex ? "border-primary" : "border-transparent opacity-70 hover:opacity-100"
               )}
               style={{ backgroundImage: `url(${image})` }}
               onClick={() => setActiveIndex(index)}
@@ -116,4 +109,4 @@ const GuideGallery: React.FC<GuideGalleryProps> = ({ images, coverImage }) => {
   );
 };
 
-export default GuideGallery; 
+export default GuideGallery;

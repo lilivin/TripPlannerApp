@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import type { PlanViewModel, PlanAttractionViewModel } from "@/types/plan-view";
 import type { PlanDetailDto, UpdatePlanCommand, GeolocationDto } from "@/types";
-import { PlanService } from "@/lib/services/PlanService";
+import * as PlanService from "@/lib/services/PlanService";
 import type { Json } from "@/db/database.types";
 
 /**

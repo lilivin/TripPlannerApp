@@ -1,50 +1,53 @@
-import { useState, useEffect } from 'react';
-import { handlePlanOfflineSync } from '../../../lib/utils/api-response';
+import { useState, useEffect, useCallback } from "react";
+import { handlePlanOfflineSync } from "../../../lib/utils/api-response";
 
-type OfflineStatus = {
+interface OfflineStatus {
   isAvailableOffline: boolean;
   isLoading: boolean;
   error: string | null;
-};
+}
 
 /**
  * Hook do zarządzania synchronizacją planów podróży w trybie offline
  * @param planId ID planu podróży
  * @returns Status dostępności planu w trybie offline
  */
-export function usePlanOfflineSync(planId: string | undefined): OfflineStatus & { sync: () => Promise<void> } {
+export function usePlanOfflineSync(planId: string | undefined): OfflineStatus & {
+  sync: () => Promise<void>;
+  toggleOfflineAvailability?: () => Promise<void>;
+} {
   const [status, setStatus] = useState<OfflineStatus>({
     isAvailableOffline: false,
     isLoading: true,
-    error: null
+    error: null,
   });
 
-  const checkOfflineAvailability = async () => {
+  const checkOfflineAvailability = useCallback(async () => {
     if (!planId) {
       setStatus({
         isAvailableOffline: false,
         isLoading: false,
-        error: 'No plan ID provided'
+        error: "No plan ID provided",
       });
       return;
     }
 
     try {
-      setStatus(prev => ({ ...prev, isLoading: true }));
+      setStatus((prev) => ({ ...prev, isLoading: true }));
       const isAvailable = await handlePlanOfflineSync(planId);
       setStatus({
         isAvailableOffline: isAvailable,
         isLoading: false,
-        error: null
+        error: null,
       });
     } catch (err) {
       setStatus({
         isAvailableOffline: false,
         isLoading: false,
-        error: err instanceof Error ? err.message : 'Unknown error occurred'
+        error: err instanceof Error ? err.message : "Unknown error occurred",
       });
     }
-  };
+  }, [planId]);
 
   useEffect(() => {
     checkOfflineAvailability();
@@ -54,18 +57,18 @@ export function usePlanOfflineSync(planId: string | undefined): OfflineStatus & 
       checkOfflineAvailability();
     };
 
-    window.addEventListener('online', handleOnlineStatusChange);
-    window.addEventListener('offline', handleOnlineStatusChange);
+    window.addEventListener("online", handleOnlineStatusChange);
+    window.addEventListener("offline", handleOnlineStatusChange);
 
     return () => {
-      window.removeEventListener('online', handleOnlineStatusChange);
-      window.removeEventListener('offline', handleOnlineStatusChange);
+      window.removeEventListener("online", handleOnlineStatusChange);
+      window.removeEventListener("offline", handleOnlineStatusChange);
     };
-  }, [planId]);
+  }, [checkOfflineAvailability]);
 
   const sync = async () => {
     await checkOfflineAvailability();
   };
 
   return { ...status, sync };
-} 
+}

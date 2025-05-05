@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { GuideSummaryDto, PaginationInfo, GuideListResponse } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,7 @@ function GuidesViewContent() {
   const [error, setError] = useState<ErrorState | null>(null);
 
   // Function to fetch guides from API
-  const fetchGuides = async () => {
+  const fetchGuides = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -99,7 +99,7 @@ function GuidesViewContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
   // Handle filter changes
   const handleFiltersChange = (newFilters: GuidesFilterViewModel) => {
@@ -164,7 +164,7 @@ function GuidesViewContent() {
   // Fetch guides on initial load and when filters change
   useEffect(() => {
     fetchGuides();
-  }, [filters]);
+  }, [fetchGuides]);
 
   return (
     <div className="container mx-auto px-4 py-8">

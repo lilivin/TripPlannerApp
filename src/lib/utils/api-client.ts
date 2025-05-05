@@ -72,7 +72,7 @@ export async function apiClient<T>(url: string, options: ApiClientOptions = {}):
           `Server didn't return JSON (got ${contentType || "unknown"}): ${text.substring(0, 100)}...`,
           response.status
         );
-      } catch (_) {
+      } catch {
         throw new ApiClientError(`Server didn't return JSON (got ${contentType || "unknown"})`, response.status);
       }
     }

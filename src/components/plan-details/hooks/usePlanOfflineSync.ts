@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import type { UpdateOfflineCacheStatusCommand } from "@/types";
-import { PlanService } from "@/lib/services/PlanService";
-import { OfflineStorage } from "@/lib/pwa/OfflineStorage";
+import { getPlanById, getOfflineStatus, updateOfflineStatus } from "@/lib/services/PlanService";
+import {
+  isPlanAvailableOffline,
+  cachePlan,
+  removePlan,
+  updateLastSyncTime,
+  isPwaSupported,
+} from "@/lib/pwa/OfflineStorage";
 
 /**
  * Hook do zarządzania dostępnością planu offline
@@ -19,20 +25,20 @@ export function usePlanOfflineSync(planId: string) {
       setIsLoading(true);
       try {
         // Sprawdź lokalnie, czy plan jest dostępny offline
-        const isLocallyAvailable = OfflineStorage.isPlanAvailableOffline(planId);
+        const isLocallyAvailable = isPlanAvailableOffline(planId);
 
         // Sprawdź status na serwerze
-        const data = await PlanService.getOfflineStatus(planId);
+        const data = await getOfflineStatus(planId);
 
         // Jeśli plan jest dostępny lokalnie, ale nie na serwerze, aktualizuj status na serwerze
         if (isLocallyAvailable && !data.is_cached) {
-          await PlanService.updateOfflineStatus(planId, { is_cached: true });
+          await updateOfflineStatus(planId, { is_cached: true });
           setIsAvailableOffline(true);
         }
         // Jeśli plan jest dostępny na serwerze, ale nie lokalnie, pobierz go
         else if (!isLocallyAvailable && data.is_cached) {
-          const planData = await PlanService.getPlanById(planId);
-          await OfflineStorage.cachePlan(planData);
+          const planData = await getPlanById(planId);
+          await cachePlan(planData);
           setIsAvailableOffline(true);
         }
         // W innym przypadku ustaw status zgodnie z serwerem
@@ -44,7 +50,7 @@ export function usePlanOfflineSync(planId: string) {
         console.error("Error checking offline status:", err);
 
         // W przypadku błędu serwera, korzystaj z lokalnego statusu
-        const isLocallyAvailable = OfflineStorage.isPlanAvailableOffline(planId);
+        const isLocallyAvailable = isPlanAvailableOffline(planId);
         setIsAvailableOffline(isLocallyAvailable);
       } finally {
         setIsLoading(false);
@@ -66,24 +72,24 @@ export function usePlanOfflineSync(planId: string) {
         is_cached: newStatus,
       };
 
-      await PlanService.updateOfflineStatus(planId, payload);
+      await updateOfflineStatus(planId, payload);
 
       // Aktualizacja lokalna
       if (newStatus) {
         // Pobierz plan i zapisz lokalnie
-        const planData = await PlanService.getPlanById(planId);
-        await OfflineStorage.cachePlan(planData);
-        OfflineStorage.updateLastSyncTime();
+        const planData = await getPlanById(planId);
+        await cachePlan(planData);
+        updateLastSyncTime();
       } else {
         // Usuń plan z pamięci lokalnej
-        OfflineStorage.removePlan(planId);
+        removePlan(planId);
       }
 
       setIsAvailableOffline(newStatus);
 
       // Pomocnicze powiadomienie
       if (newStatus) {
-        if (OfflineStorage.isPwaSupported()) {
+        if (isPwaSupported()) {
           console.log("Plan saved for offline use");
         } else {
           console.warn("Browser doesn't support all PWA features. Offline mode may not work correctly.");

@@ -4,11 +4,11 @@ import type {
   AttractionListResponse,
   AttractionSummaryDto,
   AttractionDetailDto,
-  TagDto,
   UpsertAttractionCommand,
 } from "../../types";
+import type { Json } from "../../db/database.types";
 import { validateImageUrls } from "../utils/validation";
-import { ApiError, ApiErrorTypes } from "../utils/api-response";
+import { ApiError } from "../utils/api-response";
 
 // Interface for raw database attraction response
 interface DatabaseAttraction {
@@ -20,8 +20,8 @@ interface DatabaseAttraction {
   images: string[];
   creator_id: string;
   average_visit_time_minutes: number | null;
-  opening_hours: any | null;
-  contact_info: any | null;
+  opening_hours: Json | null;
+  contact_info: Json | null;
   ticket_price_info: string | null;
   accessibility_info: string | null;
   creator: {
@@ -104,7 +104,7 @@ export const attractionsService = {
       );
     }
 
-    const { count, error: countError } = await countQueryBuilder;
+    const { count } = await countQueryBuilder;
     const total = count || 0;
 
     // Execute main query with pagination

@@ -449,9 +449,16 @@ export interface PaginationInfo {
  * Schema for validating attraction queries
  */
 export const attractionsQuerySchema = {
-  safeParse: (data: Record<string, any>) => {
+  safeParse: (data: Record<string, unknown>) => {
     // Implementation would use a validation library like Zod
     // This is just a stub for the example
     return { success: true, data };
   },
 };
+
+export interface ErrorResponse {
+  error: {
+    message: string;
+    details?: Record<string, unknown>;
+  };
+}

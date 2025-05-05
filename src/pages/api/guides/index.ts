@@ -1,18 +1,24 @@
-import type { APIRoute, APIContext } from "astro";
-import type { AstroGlobal } from "astro";
+import type { APIRoute } from "astro";
 import { guidesService } from "../../../lib/services/guides.service";
 import { guidesQuerySchema } from "../../../schemas/guides.schema";
 import { createGuideSchema } from "../../../schemas/guide-create.schema";
-import { ApiError, ApiErrorTypes } from "../../../lib/utils/api-response";
+import { ApiError } from "../../../lib/utils/api-response";
 import { createSuccessResponse, createErrorResponse } from "../../../lib/utils/api-response";
-import { ResponseCache } from "../../../lib/cache/response-cache";
-import type { UpsertGuideCommand } from "../../../types";
+import type { UpsertGuideCommand, GuideDetailDto, OfflineCacheStatusDto, GuideQuery } from "../../../types";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+// Extend the Locals type for Astro
+declare global {
+  interface Locals {
+    supabase: SupabaseClient;
+  }
+}
 
 export const prerender = false;
 
-// Cache configuration
-const CACHE_NAME = "guides-list";
-const CACHE_TTL_SECONDS = 600; // 10 minutes
+// Cache configuration - commented out for now as it's not being used
+// const CACHE_NAME = "guides-list";
+// const CACHE_TTL_SECONDS = 600; // 10 minutes
 
 /**
  * GET /api/guides
@@ -59,25 +65,8 @@ export const GET: APIRoute = async ({ request, locals }) => {
     // Get validated query parameters
     const query = validationResult.data;
 
-    // Generate a cache key from query parameters
-    const cacheKey = generateCacheKey(query);
-
-    // Get the cache instance
-    const cache = ResponseCache.getInstance();
-
-    // Access Supabase client from context
-    const supabase = locals.supabase;
-
-    // Call service method with caching
-    const response = await guidesService.getGuides(supabase, query);
-    /*
-    const response = await cache.getOrSet(
-      CACHE_NAME,
-      cacheKey,
-      () => guidesService.getGuides(supabase, query),
-      CACHE_TTL_SECONDS
-    );
-    */
+    // Call service method
+    const response = await guidesService.getGuides(locals.supabase, query);
 
     // Return successful response with cache headers
     return new Response(JSON.stringify(response), {
@@ -124,18 +113,19 @@ export const GET: APIRoute = async ({ request, locals }) => {
  * - 403 Forbidden: Creator privileges required
  * - 500 Internal Server Error: Server error occurred
  */
-export const POST: APIRoute = async ({ request, locals }: APIContext) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   try {
     // Development mode test header for bypassing authentication
     // IMPORTANT: Use only for testing and remove in production
     const TEST_CREATOR_ID = "00000000-0000-4000-a000-000000000001";
     const isTestMode = process.env.NODE_ENV === "development" && request.headers.get("X-Test-Mode") === "true";
 
-    let creatorId: string | null = null;
+    let creatorId: string;
 
     if (isTestMode) {
       // Use the test creator ID or the one provided in headers
-      creatorId = request.headers.get("X-Test-Creator-ID") || TEST_CREATOR_ID;
+      const testId = request.headers.get("X-Test-Creator-ID");
+      creatorId = testId || TEST_CREATOR_ID;
       console.log("⚠️ TEST MODE: Using test creator ID:", creatorId);
     } else {
       // Regular authentication flow
@@ -242,7 +232,7 @@ export const POST: APIRoute = async ({ request, locals }: APIContext) => {
         code: string;
       }
       const isDatabaseError = (err: unknown): err is DatabaseError =>
-        typeof err === "object" && err !== null && "code" in err && typeof (err as any).code === "string";
+        typeof err === "object" && err !== null && "code" in err && typeof err.code === "string";
 
       // Check for specific Supabase/PostgreSQL error codes
       if (isDatabaseError(serviceError)) {
@@ -286,9 +276,13 @@ export const POST: APIRoute = async ({ request, locals }: APIContext) => {
  * @param query The query parameters
  * @returns A cache key string
  */
-function generateCacheKey(query: Record<string, any>): string {
+function _generateCacheKey(query: GuideQuery): string {
   return Object.entries(query)
-    .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
-    .map(([key, value]) => `${key}=${String(value)}`)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, value]) => `${key}=${value}`)
     .join("&");
+}
+
+interface _GuideWithCache extends GuideDetailDto {
+  cache_status: OfflineCacheStatusDto | null;
 }
