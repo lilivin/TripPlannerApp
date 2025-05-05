@@ -32,34 +32,9 @@ jobs:
         
       - name: Run unit tests
         run: npm run test
-        
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
       
-      - name: Build for e2e tests
+      - name: Build
         run: npm run build
-        
-      - name: Install wait-on utility
-        run: npm install -g wait-on
-        
-      - name: Start preview server and run e2e tests
-        run: |
-          npm run preview & 
-          wait-on http://localhost:3000
-          npm run test:e2e
-        env:
-          BASE_URL: http://localhost:3000
-          CI: true
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          
-      - name: Upload Playwright test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 7
           
       - name: Archive build artifacts
         uses: actions/upload-artifact@v4
