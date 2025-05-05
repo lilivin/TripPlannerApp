@@ -56,6 +56,16 @@ const config: PlaywrightTestConfig = {
 
   // Create artifacts directory for storing screenshots and traces
   outputDir: "test-results/",
+
+  // Automatically start the web server before tests
+  webServer: {
+    command: "npm run preview",
+    url: "http://localhost:3000",
+    reuseExistingServer: !process.env.CI,
+    stdout: "pipe",
+    stderr: "pipe",
+    timeout: 60 * 1000, // 60 seconds to start
+  },
 };
 
 export default config;
