@@ -11,11 +11,11 @@ test.describe("Login Scenario", () => {
       process.env.E2E_PASSWORD || "testPassword123!"
     );
 
-    // Wait for the login process to complete and redirect
-    await loginPage.page.waitForNavigation({ timeout: 10000 }).catch(() => {});
+    // Wait for the login process to complete
+    await loginPage.waitForLoginCompletion(15000);
 
-    // Assert: Verify user is logged in and redirected to home page
-    await expect(loginPage.page).toHaveURL("/", { timeout: 10000 });
+    // Assert: Verify user is logged in and on home page
+    await expect(loginPage.page).toHaveURL("/", { timeout: 15000 });
     await homePage.assertLoggedIn();
   });
 

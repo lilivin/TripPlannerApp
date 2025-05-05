@@ -75,6 +75,19 @@ export class LoginPage {
   }
 
   /**
+   * Wait for login to complete with redirect to home page
+   * @param timeout - Time in ms to wait for redirect
+   */
+  async waitForLoginCompletion(timeout = 10000) {
+    try {
+      await this.page.waitForURL("/", { timeout });
+    } catch (error) {
+      console.error("Login redirection failed:", error);
+      // Continue test execution even if redirect fails
+    }
+  }
+
+  /**
    * Assert that we are on the login page
    */
   async assertOnLoginPage() {

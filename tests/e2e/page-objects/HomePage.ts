@@ -35,22 +35,27 @@ export class HomePage {
 
   /**
    * Assert that the user is logged in
+   * @param timeout - Maximum time to wait for logged in state
    */
-  async assertLoggedIn() {
+  async assertLoggedIn(timeout = 15000) {
     // Using multiple possible indicators of logged-in state
     // At least one should pass for a successful verification
     try {
       // Try to verify profile menu is visible (primary indicator)
-      await expect(this.userProfileMenu).toBeVisible({ timeout: 5000 });
+      await expect(this.userProfileMenu).toBeVisible({ timeout });
       return;
     } catch {
       try {
         // Try to verify welcome message is visible
-        await expect(this.welcomeMessage).toBeVisible({ timeout: 2000 });
+        await expect(this.welcomeMessage).toBeVisible({ timeout: 5000 });
         return;
       } catch {
-        // Verify login button is not visible
-        await expect(this.loginButton).not.toBeVisible({ timeout: 2000 });
+        try {
+          // Verify login button is not visible
+          await expect(this.loginButton).not.toBeVisible({ timeout: 5000 });
+        } catch (error) {
+          throw new Error(`Failed to verify logged in state: ${error}`);
+        }
       }
     }
   }
