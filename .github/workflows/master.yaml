@@ -45,10 +45,10 @@ jobs:
       - name: Start preview server and run e2e tests
         run: |
           npm run preview & 
-          wait-on http://localhost:4000
+          wait-on http://localhost:3000
           npm run test:e2e
         env:
-          BASE_URL: http://localhost:4000
+          BASE_URL: http://localhost:3000
           CI: true
           
       - name: Upload Playwright test results
