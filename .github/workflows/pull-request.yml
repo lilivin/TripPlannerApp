@@ -112,8 +112,8 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
 
-      - name: Run E2E tests with debug mode
-        run: npm run test:e2e -- --debug
+      - name: Run E2E tests with headless mode
+        run: npm run test:e2e
         env:
           CI: true
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
