@@ -12,15 +12,6 @@ type LoginFormData = z.infer<typeof loginSchema>;
 // Extended form errors type to include root error
 type FormErrors = Partial<Record<keyof LoginFormData | "root", string>>;
 
-// Check if we're in E2E test mode
-const isE2ETest = () => {
-  return (
-    window.navigator.userAgent.includes("Playwright") ||
-    process.env.NODE_ENV === "test" ||
-    new URLSearchParams(window.location.search).has("e2e")
-  );
-};
-
 const LoginForm: React.FC = () => {
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
@@ -28,7 +19,6 @@ const LoginForm: React.FC = () => {
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<string>("");
 
   const validateField = (name: keyof LoginFormData, value: string) => {
     try {
@@ -49,13 +39,6 @@ const LoginForm: React.FC = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     validateField(name as keyof LoginFormData, value);
-  };
-
-  const logDebug = (message: string) => {
-    if (isE2ETest()) {
-      console.log(`[E2E-DEBUG] ${message}`);
-      setDebugInfo((prev) => `${prev}\n${message}`);
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -101,10 +84,8 @@ const LoginForm: React.FC = () => {
     if (!isValid) return;
 
     setIsLoading(true);
-    logDebug(`Submitting login form with email: ${formData.email.substring(0, 3)}*****`);
 
     try {
-      logDebug("Sending login request to /api/auth/login");
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
@@ -113,23 +94,17 @@ const LoginForm: React.FC = () => {
         body: JSON.stringify(formData),
       });
 
-      const responseData = await response.json();
-      logDebug(`Login response status: ${response.status}, ${response.ok ? "success" : "failed"}`);
-
       if (!response.ok) {
-        logDebug(`Login error: ${JSON.stringify(responseData)}`);
         setErrors({
-          root: responseData.error || "Invalid email or password",
+          root: "Invalid email or password",
         });
         return;
       }
 
-      logDebug("Login successful, redirecting to home page");
       // Success - redirect to home page
       window.location.href = "/";
     } catch (error) {
       console.error("Login error:", error);
-      logDebug(`Login exception: ${error instanceof Error ? error.message : String(error)}`);
       setErrors({
         root: error instanceof Error ? error.message : "Failed to login. Please try again.",
       });
@@ -213,18 +188,6 @@ const LoginForm: React.FC = () => {
           <div className="flex">
             <div className="text-sm text-red-700">{errors.root}</div>
           </div>
-        </div>
-      )}
-
-      {isE2ETest() && debugInfo && (
-        <div
-          className="rounded-md bg-gray-100 p-2 text-xs font-mono whitespace-pre overflow-auto max-h-32"
-          data-testid="debug-info"
-        >
-          <details>
-            <summary>Debug Info</summary>
-            {debugInfo}
-          </details>
         </div>
       )}
 

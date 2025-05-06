@@ -75,51 +75,18 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install chromium
 
-      - name: Create env file for testing
-        run: |
-          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" > .env.test
-          echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env.test
-          echo "VITE_SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env.test
-          echo "VITE_SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env.test
-          echo "E2E_USERNAME=${{ secrets.E2E_USERNAME }}" >> .env.test
-          echo "E2E_PASSWORD=${{ secrets.E2E_PASSWORD }}" >> .env.test
-          echo "E2E_USERNAME_ID=${{ secrets.E2E_USERNAME_ID }}" >> .env.test
-          chmod +x ./scripts/check-env.mjs
-
-      - name: Check environment variables
-        run: node ./scripts/check-env.mjs
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          VITE_SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          E2E_USERNAME_ID: ${{ secrets.E2E_USERNAME_ID }}
-          E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
-          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
-
-      - name: Debug environment
-        run: |
-          echo "Checking for environment variables (values redacted)"
-          env | grep -E 'SUPABASE|E2E' | sed 's/=.*/=REDACTED/'
-          echo "Contents of .env.test (values redacted)"
-          cat .env.test | sed 's/=.*/=REDACTED/'
-
       - name: Build application
         run: npm run build
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          VITE_SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
 
-      - name: Run E2E tests with debug
-        run: PWDEBUG=1 npm run test:e2e -- --debug
+      - name: Run E2E tests
+        run: npm run test:e2e
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          VITE_SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           E2E_USERNAME_ID: ${{ secrets.E2E_USERNAME_ID }}
           E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
           E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}

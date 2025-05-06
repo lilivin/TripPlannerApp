@@ -70,7 +70,6 @@ export class LoginPage {
    * @param password - The password to use
    */
   async login(email: string, password: string) {
-    console.log(`Attempting to login with email: ${email}`);
     await this.fillLoginForm(email, password);
     await this.submitForm();
   }
@@ -79,99 +78,12 @@ export class LoginPage {
    * Wait for login to complete with redirect to home page
    * @param timeout - Time in ms to wait for redirect
    */
-  async waitForLoginCompletion(timeout = 30000) {
+  async waitForLoginCompletion(timeout = 10000) {
     try {
-      console.log("Waiting for redirection to home page...");
       await this.page.waitForURL("/", { timeout });
-      console.log("Successfully redirected to home page");
     } catch (error) {
       console.error("Login redirection failed:", error);
-      console.log("Current URL:", this.page.url());
-
-      // Try to log any visible error messages on the page
-      try {
-        const pageContent = await this.page.content();
-        console.log("Page content excerpt:", pageContent.substring(0, 500) + "...");
-
-        const errorText = (await this.loginError.isVisible())
-          ? await this.loginError.textContent()
-          : "No visible error message";
-        console.log("Error message on page:", errorText);
-
-        // Check authentication status in local storage
-        await this.checkAuthStatus();
-      } catch (e) {
-        console.error("Failed to extract page information:", e);
-      }
-
       // Continue test execution even if redirect fails
-    }
-  }
-
-  /**
-   * Check authentication status by inspecting localStorage and sessionStorage
-   */
-  async checkAuthStatus() {
-    try {
-      console.log("Checking auth status in storage...");
-
-      // Check localStorage
-      const localStorageData = await this.page.evaluate(() => {
-        const data: Record<string, string | null> = {};
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key) {
-            try {
-              // Mask sensitive data in tokens
-              const value = localStorage.getItem(key);
-              if (key.includes("token") || key.includes("refresh") || key.includes("auth")) {
-                data[key] = value ? "***MASKED***" : null;
-              } else {
-                data[key] = value;
-              }
-            } catch {
-              data[key] = "ERROR: Could not stringify value";
-            }
-          }
-        }
-        return data;
-      });
-      console.log("localStorage data:", JSON.stringify(localStorageData, null, 2));
-
-      // Check sessionStorage
-      const sessionStorageData = await this.page.evaluate(() => {
-        const data: Record<string, string | null> = {};
-        for (let i = 0; i < sessionStorage.length; i++) {
-          const key = sessionStorage.key(i);
-          if (key) {
-            try {
-              // Mask sensitive data in tokens
-              const value = sessionStorage.getItem(key);
-              if (key.includes("token") || key.includes("refresh") || key.includes("auth")) {
-                data[key] = value ? "***MASKED***" : null;
-              } else {
-                data[key] = value;
-              }
-            } catch {
-              data[key] = "ERROR: Could not stringify value";
-            }
-          }
-        }
-        return data;
-      });
-      console.log("sessionStorage data:", JSON.stringify(sessionStorageData, null, 2));
-
-      // Check cookies
-      const cookies = await this.page.context().cookies();
-      console.log(
-        "Cookies:",
-        cookies.map((c) => ({ name: c.name, domain: c.domain, path: c.path }))
-      );
-
-      // Take a screenshot for visual debugging
-      await this.page.screenshot({ path: "test-results/auth-failure.png" });
-    } catch (error) {
-      console.error("Error checking auth status:", error);
     }
   }
 
