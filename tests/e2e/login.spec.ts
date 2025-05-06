@@ -28,53 +28,45 @@ test.describe("Login Scenario", () => {
     }
   });
 
-  test("Should successfully log in with valid credentials", async ({ loginPage, homePage, page, browser }) => {
-    // Log browser and environment information
+  test("Should successfully log in with valid credentials", async ({ loginPage, homePage, page }) => {
+    // Log environment information
     console.log(`Running login test with username: ${process.env.E2E_USERNAME || "test.user@example.com"}`);
     console.log(`In CI environment: ${isCI}`);
-    console.log(`Browser is headless: ${browser.isConnected() ? "checking connection" : "unknown"}`);
     console.log(`Viewport size: ${page.viewportSize()?.width}x${page.viewportSize()?.height}`);
 
-    try {
-      // Arrange: Navigate to the login page
-      await loginPage.goto();
+    // Arrange: Navigate to the login page
+    await loginPage.goto();
 
-      // Take a screenshot of initial state in CI
-      if (isCI) {
-        await page.screenshot({ path: `test-results/login-initial-state.png` });
-      }
-
-      // Act: Login with valid credentials from environment variables
-      await loginPage.login(
-        process.env.E2E_USERNAME || "test.user@example.com",
-        process.env.E2E_PASSWORD || "testPassword123!"
-      );
-
-      // Take a screenshot after entering credentials in CI
-      if (isCI) {
-        await page.screenshot({ path: `test-results/login-after-credentials.png` });
-      }
-
-      // Wait for the login process to complete with more detailed logging
-      console.log("Waiting for login completion...");
-      await loginPage.waitForLoginCompletion(5000);
-      console.log(`Current URL after login attempt: ${page.url()}`);
-
-      // Increase timeout for CI environments
-      const timeout = isCI ? 10000 : 5000;
-
-      // Assert: Verify user is logged in and on home page
-      await expect(loginPage.page).toHaveURL("/", { timeout });
-      console.log("URL check passed");
-
-      await homePage.assertLoggedIn();
-      console.log("Login assertion passed");
-    } catch (error) {
-      console.error("Error in login test:", error);
-      // Take screenshot on error
-      await page.screenshot({ path: `test-results/login-error-state-${Date.now()}.png` });
-      throw error;
+    // Take a screenshot of initial state in CI
+    if (isCI) {
+      await page.screenshot({ path: `test-results/login-initial-state.png` });
     }
+
+    // Act: Login with valid credentials from environment variables
+    await loginPage.login(
+      process.env.E2E_USERNAME || "test.user@example.com",
+      process.env.E2E_PASSWORD || "testPassword123!"
+    );
+
+    // Take a screenshot after entering credentials in CI
+    if (isCI) {
+      await page.screenshot({ path: `test-results/login-after-credentials.png` });
+    }
+
+    // Wait for the login process to complete with more detailed logging
+    console.log("Waiting for login completion...");
+    await loginPage.waitForLoginCompletion(5000);
+    console.log(`Current URL after login attempt: ${page.url()}`);
+
+    // Increase timeout for CI environments
+    const timeout = isCI ? 10000 : 5000;
+
+    // Assert: Verify user is logged in and on home page
+    await expect(loginPage.page).toHaveURL("/", { timeout });
+    console.log("URL check passed");
+
+    await homePage.assertLoggedIn();
+    console.log("Login assertion passed");
   });
 
   test("Should show error with invalid credentials", async ({ loginPage }) => {
