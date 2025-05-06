@@ -10,7 +10,7 @@ interface AttractionActionsProps {
 
 export default function AttractionActions({ onRemove, onEditNote, hasNote = false }: AttractionActionsProps) {
   return (
-    <div className="absolute bottom-4 right-4 flex space-x-1">
+    <div className="absolute bottom-4 right-4 flex space-x-1 mb-2">
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
