@@ -1,5 +1,7 @@
 import { test, expect } from "./page-objects/BaseTest";
 
+test.describe.configure({ mode: "parallel" });
+
 test.describe("Login Scenario", () => {
   test("Should successfully log in with valid credentials", async ({ loginPage, homePage }) => {
     // Arrange: Navigate to the login page
@@ -12,10 +14,10 @@ test.describe("Login Scenario", () => {
     );
 
     // Wait for the login process to complete
-    await loginPage.waitForLoginCompletion(15000);
+    await loginPage.waitForLoginCompletion(5000);
 
     // Assert: Verify user is logged in and on home page
-    await expect(loginPage.page).toHaveURL("/", { timeout: 15000 });
+    await expect(loginPage.page).toHaveURL("/", { timeout: 5000 });
     await homePage.assertLoggedIn();
   });
 
@@ -28,7 +30,7 @@ test.describe("Login Scenario", () => {
 
     // Assert: Check for error message and that we're still on login page
     await loginPage.assertOnLoginPage();
-    await expect(loginPage.loginError).toBeVisible();
+    await expect(loginPage.loginError).toBeVisible({ timeout: 3000 });
   });
 
   test("Should validate form inputs", async ({ loginPage }) => {
@@ -37,32 +39,32 @@ test.describe("Login Scenario", () => {
 
     // Act & Assert: Try to submit with empty fields
     await loginPage.submitForm();
-    await expect(loginPage.emailError).toBeVisible();
+    await expect(loginPage.emailError).toBeVisible({ timeout: 2000 });
     await expect(loginPage.emailError).toHaveText("Please enter a valid email address");
-    await expect(loginPage.passwordError).toBeVisible();
+    await expect(loginPage.passwordError).toBeVisible({ timeout: 2000 });
     await expect(loginPage.passwordError).toHaveText("Password must be at least 6 characters");
 
     // Act & Assert: Test invalid email format
     await loginPage.emailInput.fill("notanemail");
     await loginPage.submitForm();
-    await expect(loginPage.emailError).toBeVisible();
+    await expect(loginPage.emailError).toBeVisible({ timeout: 2000 });
     await expect(loginPage.emailError).toHaveText("Please enter a valid email address");
 
     // Act & Assert: Test valid email
     await loginPage.emailInput.fill("user@example.com");
     await loginPage.submitForm();
-    await expect(loginPage.emailError).not.toBeVisible();
-    await expect(loginPage.passwordError).toBeVisible();
+    await expect(loginPage.emailError).not.toBeVisible({ timeout: 2000 });
+    await expect(loginPage.passwordError).toBeVisible({ timeout: 2000 });
 
     // Act & Assert: Test too short password
     await loginPage.passwordInput.fill("12345");
     await loginPage.submitForm();
-    await expect(loginPage.passwordError).toBeVisible();
+    await expect(loginPage.passwordError).toBeVisible({ timeout: 2000 });
     await expect(loginPage.passwordError).toHaveText("Password must be at least 6 characters");
 
     // Act & Assert: Test valid password
     await loginPage.passwordInput.fill("123456");
     await loginPage.submitForm();
-    await expect(loginPage.passwordError).not.toBeVisible();
+    await expect(loginPage.passwordError).not.toBeVisible({ timeout: 2000 });
   });
 });
