@@ -7,6 +7,8 @@ import PlanSaveDialog from "./PlanSaveDialog";
 import { usePlanPreview } from "./hooks/usePlanPreview";
 import LoadingState from "../common/LoadingState";
 import ErrorState from "../common/ErrorState";
+import { Provider } from "react-redux";
+import { store } from "@/store";
 
 interface PlanPreviewPageProps {
   guideId: string;
@@ -48,7 +50,11 @@ export default function PlanPreviewPage({ guideId }: PlanPreviewPageProps) {
     return <ErrorState code={404} message={loadError || "No plan data found"} />;
   }
 
-  return <PlanPreviewContent guideId={guideId} generationResponse={generationResponse} />;
+  return (
+    <Provider store={store}>
+      <PlanPreviewContent guideId={guideId} generationResponse={generationResponse} />
+    </Provider>
+  );
 }
 
 // Separate component to use the usePlanPreview hook after data is loaded
