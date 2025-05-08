@@ -77,6 +77,8 @@ function PlanPreviewContent({
     return <ErrorState code={500} message={error} />;
   }
 
+  console.log("planViewModel", planViewModel);
+
   if (!planViewModel) {
     return <LoadingState message="Preparing plan preview..." />;
   }

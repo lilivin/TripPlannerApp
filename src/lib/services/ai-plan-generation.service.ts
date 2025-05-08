@@ -33,8 +33,8 @@ export async function generatePlan(
     address: attraction.address,
   }));
 
-  // Przygotuj prostszy prompt na podstawie przewodnika i atrakcji
-  const prompt = `Stwórz plan podróży na ${command.days} dni dla miejsca "${guide.location_name}" na podstawie tylko tych atrakcji:
+  // Przygotuj prompt, który wymaga od AI stworzenia struktury JSON z dniami i atrakcjami
+  const prompt = `Stwórz szczegółowy plan podróży na ${command.days} dni dla miejsca "${guide.location_name}" na podstawie tylko tych atrakcji:
 ${attractionsData.map((a) => `- ${a.name} ${a.is_highlight ? "(highlight)" : ""}`).join("\n")}
 
 Uwzględnij preferencje:
@@ -44,7 +44,27 @@ ${command.preferences.end_time ? `- Koniec dnia: ${command.preferences.end_time}
 ${command.preferences.include_meals ? "- Uwzględnij posiłki" : ""}
 ${command.preferences.transportation_mode ? `- Transport: ${command.preferences.transportation_mode}` : ""}
 
-NIE DODAWAJ żadnych atrakcji spoza listy.`;
+Odpowiedź MUSI zawierać strukturę JSON z listą dni i atrakcji w formacie:
+{
+  "days": [
+    {
+      "dayNumber": 1,
+      "attractions": [
+        {
+          "id": "[ID atrakcji z listy]",
+          "name": "[Nazwa atrakcji]",
+          "description": "[Opis atrakcji]",
+          "visitDuration": 60, // czas zwiedzania w minutach
+          "startTime": "10:00",
+          "endTime": "11:00",
+          "address": "[Adres atrakcji]"
+        }
+      ]
+    }
+  ]
+}
+
+NIE DODAWAJ żadnych atrakcji spoza listy. UŻYWAJ tylko istniejących ID atrakcji z podanej powyżej listy.`;
 
   console.log("AI Prompt:", prompt);
 
@@ -74,7 +94,7 @@ NIE DODAWAJ żadnych atrakcji spoza listy.`;
         [
           {
             role: "system",
-            content: "Jesteś asystentem podróży. Tworzysz plany zwiedzania w formacie tekstowym.",
+            content: "Jesteś asystentem podróży. Tworzysz plany zwiedzania w formacie JSON zgodnie z podaną strukturą.",
           },
           { role: "user", content: prompt },
         ],
@@ -92,12 +112,27 @@ NIE DODAWAJ żadnych atrakcji spoza listy.`;
       // Pobierz zawartość z pierwszej odpowiedzi
       const content = response.choices[0]?.message?.content || "Nie udało się wygenerować planu.";
 
-      // Zwróć tekstową odpowiedź jako zawartość (poprawiony format)
+      // Spróbuj znaleźć strukturę JSON w odpowiedzi
+      let parsedContent;
+      try {
+        // Próba wyodrębnienia JSON z odpowiedzi
+        const jsonMatch =
+          content.match(/```json([\s\S]*?)```/) || content.match(/```([\s\S]*?)```/) || content.match(/({[\s\S]*})/);
+        const jsonString = jsonMatch ? jsonMatch[1].trim() : content;
+        parsedContent = JSON.parse(jsonString);
+        console.log("Sparsowana zawartość JSON:", parsedContent);
+      } catch (parseError) {
+        console.error("Błąd parsowania JSON z odpowiedzi:", parseError);
+        // Jeśli parsowanie się nie powiedzie, utwórz pustą strukturę
+        parsedContent = { days: [] };
+      }
+
+      // Mapuj odpowiedź do wymaganego formatu
       return {
         content: {
           title: `Plan na ${command.days} dni w ${guide.location_name}`,
           summary: content,
-          days: [],
+          days: parsedContent.days || [],
         } as Json,
         generation_params: {
           model: MODEL,
