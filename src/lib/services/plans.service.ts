@@ -7,8 +7,13 @@ import type {
   PaginationInfo,
   PlanDetailDto,
   CreatePlanCommand,
+  PlanSummaryViewModel,
+  PlansViewFilterState,
 } from "../../types";
+import type { Result } from "../utils/result";
+import { createSuccess, createError } from "../utils/result";
 import { ApiError } from "../utils/api-response";
+import { fetchUserPlans, deletePlan, togglePlanOfflineStatus } from "./plans.client";
 
 export async function getUserPlans(
   supabase: SupabaseClient<Database>,
@@ -251,5 +256,69 @@ export async function updatePlan(
   } catch (error) {
     console.error("Error in updatePlan:", error);
     throw error;
+  }
+}
+
+export function formatPlanDate(date: string): string {
+  try {
+    return new Date(date).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  } catch (err) {
+    console.error("Error formatting date", err);
+    return date;
+  }
+}
+
+export function transformPlanData(plan: PlanSummaryDto): Result<PlanSummaryViewModel> {
+  if (!plan || !plan.id || !plan.name || !plan.guide || !plan.created_at) {
+    return createError(new Error("Invalid plan data"));
+  }
+
+  return createSuccess({
+    ...plan,
+    formattedDate: formatPlanDate(plan.created_at),
+  });
+}
+
+export async function fetchPlansWithTransform(filters: PlansViewFilterState): Promise<
+  Result<{
+    plans: PlanSummaryViewModel[];
+    pagination: { total: number; page: number; limit: number; pages: number };
+  }>
+> {
+  try {
+    const response = await fetchUserPlans(filters);
+    const transformedPlans = response.data
+      .map(transformPlanData)
+      .filter((result): result is { success: true; data: PlanSummaryViewModel } => result.success)
+      .map((result) => result.data);
+
+    return createSuccess({
+      plans: transformedPlans,
+      pagination: response.pagination,
+    });
+  } catch (error) {
+    return createError(error instanceof Error ? error : new Error("Failed to fetch plans"));
+  }
+}
+
+export async function handlePlanDeletion(id: string): Promise<Result<void>> {
+  try {
+    await deletePlan(id);
+    return createSuccess(undefined);
+  } catch (error) {
+    return createError(error instanceof Error ? error : new Error("Failed to delete plan"));
+  }
+}
+
+export async function handleToggleOffline(id: string, isOfflineAvailable: boolean): Promise<Result<void>> {
+  try {
+    await togglePlanOfflineStatus(id, isOfflineAvailable);
+    return createSuccess(undefined);
+  } catch (error) {
+    return createError(error instanceof Error ? error : new Error("Failed to toggle offline status"));
   }
 }

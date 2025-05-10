@@ -22,7 +22,7 @@ const { title = "TripPlannerApp - Plan Your Trip" } = Astro.props;
     <meta name="theme-color" content="#0f172a" />
   </head>
   <body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
-    <AppProvider client:only="react">
+    <AppProvider client:load>
       <div class="min-h-screen flex flex-col">
         <header class="bg-white dark:bg-gray-800 shadow">
           <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
