@@ -695,6 +695,86 @@ Leveraging Supabase Auth service for authentication operations.
 - **Success Codes**: 200 OK
 - **Error Codes**: 400 Bad Request, 401 Unauthorized, 404 Not Found, 500 Internal Server Error
 
+### Home Page
+
+#### GET /api/home
+- **Description**: Get personalized home page content
+- **Query Parameters**:
+  - `language`: Language preference (default: user's language or "pl")
+- **Response Body for Logged-Out Users**:
+  ```json
+  {
+    "featured_guides": [
+      {
+        "id": "uuid",
+        "title": "string",
+        "description": "string",
+        "price": "decimal",
+        "location_name": "string",
+        "cover_image_url": "string",
+        "average_rating": "decimal"
+      }
+    ]
+  }
+  ```
+
+- **Response Body for Logged-In Users**:
+  ```json
+  {
+    "user_greeting": {
+      "display_name": "string",
+      "avatar_url": "string"
+    },
+    "recent_plans": [
+      {
+        "id": "uuid",
+        "name": "string",
+        "guide": {
+          "title": "string",
+          "location_name": "string"
+        },
+        "created_at": "timestamp",
+        "is_favorite": "boolean",
+        "thumbnail_url": "string"
+      }
+    ],
+    "recommended_guides": [
+      {
+        "id": "uuid",
+        "title": "string",
+        "description": "string",
+        "price": "decimal",
+        "location_name": "string",
+        "cover_image_url": "string",
+        "average_rating": "decimal",
+        "reason": "string"
+      }
+    ],
+    "new_guides": [
+      {
+        "id": "uuid",
+        "title": "string",
+        "price": "decimal",
+        "location_name": "string",
+        "cover_image_url": "string",
+        "added_at": "timestamp"
+      }
+    ]
+  }
+  ```
+
+- **Note on Static Content**: 
+  Static content elements such as:
+  - Benefits list
+  - Testimonials
+  - How it works steps
+  - Feature descriptions
+  - Marketing copy
+  
+  These will be hardcoded directly in the frontend TSX files rather than being fetched from the API. In future versions, this content will be moved to YAML files to support translations and content management without requiring code changes.
+- **Success Codes**: 200 OK
+- **Error Codes**: 401 Unauthorized (for some parts of logged-in response), 500 Internal Server Error
+
 ## 3. Authentication and Authorization
 
 The API will use Supabase Authentication for handling user authentication. The Supabase client SDK will be integrated on the frontend to manage authentication flows.

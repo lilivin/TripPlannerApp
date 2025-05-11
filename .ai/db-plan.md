@@ -122,6 +122,27 @@
 - `last_synced_at` TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
 - PRIMARY KEY (user_id, plan_id)
 
+### notifications
+- `id` UUID PRIMARY KEY DEFAULT gen_random_uuid()
+- `user_id` UUID NOT NULL REFERENCES users(id)
+- `type` VARCHAR(50) NOT NULL CHECK (type IN ('new_guide', 'guide_update', 'promo', 'system', 'recommendation'))
+- `title` VARCHAR(255) NOT NULL
+- `description` TEXT
+- `is_read` BOOLEAN DEFAULT FALSE NOT NULL
+- `created_at` TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
+- `link` TEXT
+- `data` JSONB
+- `expires_at` TIMESTAMP WITH TIME ZONE
+
+### user_guide_interactions
+- `user_id` UUID NOT NULL REFERENCES users(id)
+- `guide_id` UUID NOT NULL REFERENCES guides(id)
+- `interaction_type` VARCHAR(50) NOT NULL CHECK (interaction_type IN ('view', 'detailed_view', 'bookmark', 'generate_plan', 'purchase'))
+- `created_at` TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
+- `last_interaction_at` TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
+- `interaction_count` INTEGER DEFAULT 1 NOT NULL
+- PRIMARY KEY (user_id, guide_id, interaction_type)
+
 ## 2. Relacje między tabelami
 
 1. **users <-> creators** (Jeden do jednego)
@@ -172,6 +193,15 @@
     - Plan może być cache'owany dla wielu użytkowników
     - Relacja poprzez tabelę łączącą `offline_cache_status`
 
+12. **users -> notifications** (Jeden do wielu)
+    - Użytkownik może mieć wiele powiadomień
+    - Relacja poprzez `notifications.user_id`
+
+13. **users <-> guides** dla interakcji (Wiele do wielu)
+    - Użytkownik może wchodzić w interakcje z wieloma przewodnikami
+    - Przewodnik może mieć interakcje od wielu użytkowników
+    - Relacja poprzez tabelę łączącą `user_guide_interactions`
+
 ## 3. Indeksy
 
 ### Indeksy dla poprawy wydajności wyszukiwania
@@ -200,6 +230,14 @@
 - `CREATE INDEX idx_guides_deleted_at ON guides(deleted_at) WHERE deleted_at IS NULL;`
 - `CREATE INDEX idx_attractions_deleted_at ON attractions(deleted_at) WHERE deleted_at IS NULL;`
 - `CREATE INDEX idx_plans_deleted_at ON plans(deleted_at) WHERE deleted_at IS NULL;`
+
+### Indeksy dla powiadomień i interakcji
+- `CREATE INDEX idx_notifications_user_id ON notifications(user_id);`
+- `CREATE INDEX idx_notifications_is_read ON notifications(is_read) WHERE is_read = FALSE;`
+- `CREATE INDEX idx_notifications_created_at ON notifications(created_at);`
+- `CREATE INDEX idx_user_guide_interactions_user_id ON user_guide_interactions(user_id);`
+- `CREATE INDEX idx_user_guide_interactions_guide_id ON user_guide_interactions(guide_id);`
+- `CREATE INDEX idx_user_guide_interactions_last_interaction ON user_guide_interactions(last_interaction_at);`
 
 ## 4. Row-Level Security (RLS)
 
@@ -302,6 +340,32 @@ CREATE POLICY review_manage_own ON reviews
 CREATE POLICY review_read_visible ON reviews
     FOR SELECT
     USING (is_visible = TRUE);
+```
+
+### notifications
+```sql
+-- Polityka: Użytkownicy mogą czytać i aktualizować tylko swoje własne powiadomienia
+CREATE POLICY notification_manage_own ON notifications
+    FOR ALL
+    USING (auth.uid() = user_id);
+```
+
+### user_guide_interactions
+```sql
+-- Polityka: Użytkownicy mogą czytać tylko swoje własne interakcje
+CREATE POLICY user_guide_interactions_read_own ON user_guide_interactions
+    FOR SELECT
+    USING (auth.uid() = user_id);
+
+-- Polityka: System może odczytywać wszystkie interakcje
+CREATE POLICY user_guide_interactions_read_system ON user_guide_interactions
+    FOR SELECT
+    USING (auth.uid() IN (SELECT id FROM users WHERE is_admin = TRUE));
+    
+-- Polityka: Automatyczna aktualizacja przy interakcji
+CREATE POLICY user_guide_interactions_upsert ON user_guide_interactions
+    FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
 ```
 
 ## 5. Uwagi i decyzje projektowe

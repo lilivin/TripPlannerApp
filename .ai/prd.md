@@ -1,9 +1,9 @@
 # Dokument wymagań produktu (PRD) – TripPlanner (MVP)
 
 ## 1. Przegląd produktu
-Aplikacja TripPlanner umożliwia użytkownikom tworzenie spersonalizowanych planów wycieczek na bazie istniejących przewodników tworzonych przez różnych twórców. W odróżnieniu od rozwiązań opartych wyłącznie na „miastach", każdy przewodnik może dotyczyć wybranej lokacji (np. Warszawa) i zawierać autorskie, rozbudowane opisy atrakcji oraz sugestie dotyczące zwiedzania. 
+Aplikacja TripPlanner umożliwia użytkownikom tworzenie spersonalizowanych planów wycieczek na bazie istniejących przewodników tworzonych przez różnych twórców. W odróżnieniu od rozwiązań opartych wyłącznie na "miastach", każdy przewodnik może dotyczyć wybranej lokacji (np. Warszawa) i zawierać autorskie, rozbudowane opisy atrakcji oraz sugestie dotyczące zwiedzania. 
 
-Kluczowym elementem aplikacji jest integracja z API OpenAI, która służy do generowania angażujących i zoptymalizowanych tras. Użytkownik dokonuje wyboru przewodnika (np. „Wycieczka śladami historii Warszawy" lub „Warszawa dla fanów street artu") i na podstawie danych z przewodnika tworzy spersonalizowany plan w aplikacji. 
+Kluczowym elementem aplikacji jest integracja z API OpenAI, która służy do generowania angażujących i zoptymalizowanych tras. Użytkownik dokonuje wyboru przewodnika (np. "Wycieczka śladami historii Warszawy" lub "Warszawa dla fanów street artu") i na podstawie danych z przewodnika tworzy spersonalizowany plan w aplikacji. 
 
 W ramach MVP aplikacja powinna zapewnić:
 - Dostęp do listy dostępnych przewodników twórców (przewodnik = opis atrakcji i innych wskazówek).
@@ -14,7 +14,7 @@ W ramach MVP aplikacja powinna zapewnić:
 
 ## 2. Problem użytkownika
 - Użytkownicy chcą mieć wybór spośród wielu przewodników (np. kilku różnych twórców, różne podejścia do zwiedzania tego samego miasta).
-- Część dostępnych narzędzi turystycznych jest ograniczona do jednej „oficjalnej" wersji trasy — brak różnorodności, która odpowiadałaby potrzebom konkretnych osób.
+- Część dostępnych narzędzi turystycznych jest ograniczona do jednej "oficjalnej" wersji trasy — brak różnorodności, która odpowiadałaby potrzebom konkretnych osób.
 - Brakuje prostego sposobu na wybranie przewodnika, który najlepiej odpowiada zainteresowaniom użytkownika, a następnie na wygodne dostosowanie i generowanie spersonalizowanego planu.
 - Potrzebna jest możliwość przechowywania planów w profilu użytkownika tak, aby można było do nich wrócić w dowolnym momencie.
 - Użytkownicy potrzebują dostępu do planów wycieczek w trybie offline podczas podróży, gdy dostęp do internetu może być ograniczony.
@@ -23,7 +23,7 @@ W ramach MVP aplikacja powinna zapewnić:
 ## 3. Wymagania funkcjonalne
 1. Integracja z API OpenAI w celu generowania angażujących opisów tras i automatycznego dobierania atrakcji z wybranego przewodnika.
 2. Pobieranie listy dostępnych przewodników (z bazy Supabase):
-   - Tytuł przewodnika (np. „Warszawa – Street Art").
+   - Tytuł przewodnika (np. "Warszawa – Street Art").
    - Krótkie wprowadzenie i słowo od twórcy.
    - Szczegółowy opis atrakcji (zawartość przewodnika) i ewentualna galeria zdjęć.
    - Filtrowanie przewodników (twórcy, lokalizacje, języki, tagi tematyczne).
@@ -45,25 +45,30 @@ W ramach MVP aplikacja powinna zapewnić:
    - Przechowywanie planów w profilu użytkownika.
    - Wybór języka interfejsu (polski/angielski).
    - Zarządzanie dostępem do przewodników (w tym płatnych w przyszłych wersjach).
-5. Prezentacja spersonalizowanego planu:
+5. Strona główna dostosowana do stanu użytkownika:
+   - Dla użytkownika niezalogowanego: zachęcająca do rejestracji i prezentująca korzyści z posiadania konta oraz przykładowe przewodniki zachęcające do zakupu.
+   - Dla użytkownika zalogowanego: szybki dostęp do ostatnio zapisanych planów, rekomendowanych przewodników oraz sekcji promującej zakup przewodników premium.
+   - Personalizowane treści w oparciu o historię użytkownika (dla zalogowanych).
+   - Wyświetlanie powiadomień o nowościach i promocjach.
+6. Prezentacja spersonalizowanego planu:
    - Intuicyjny interfejs mobilny (PWA).
    - Podgląd szczegółów atrakcji, ułożenia trasy czy rekomendacji czasowych.
    - Interaktywna mapa z zaznaczonymi punktami i trasami.
    - Możliwość edycji planu (kolejność atrakcji, usuwanie, dodawanie notatek).
    - Oznaczanie ulubionych planów.
-6. Obsługa trybu offline:
+7. Obsługa trybu offline:
    - Oznaczanie planów do dostępu offline.
    - Przechowywanie danych w lokalnej pamięci urządzenia.
    - Wskaźnik statusu synchronizacji.
-7. System ocen i recenzji:
+8. System ocen i recenzji:
    - Możliwość wystawiania ocen (1-5) dla przewodników.
    - Dodawanie tekstowych recenzji.
    - Przeglądanie recenzji innych użytkowników.
-8. Przechowywanie danych w Supabase:
+9. Przechowywanie danych w Supabase:
    - Bezpieczne przechowywanie przewodników twórców i wygenerowanych planów.
    - Skalowalna struktura bazy danych (z myślą o przyszłym wersjonowaniu treści).
    - Implementacja Row-Level Security (RLS) dla zapewnienia bezpieczeństwa danych.
-9. Podstawowe narzędzia analityczne (w kolejnych etapach rozwoju):
+10. Podstawowe narzędzia analityczne (w kolejnych etapach rozwoju):
    - Pomiar retencji użytkowników.
    - Pomiar czasu spędzonego w aplikacji.
    - W początkowej wersji wystarczą proste metryki (np. integracja z zewnętrznym narzędziem).
@@ -99,7 +104,7 @@ W ramach MVP aplikacja powinna zapewnić:
   - Aplikacja udostępnia dedykowaną stronę logowania z formularzem zawierającym pola: adres email i hasło.
   - Przycisk logowania jest widoczny w prawym górnym rogu interfejsu dla niezalogowanych użytkowników.
   - Po wprowadzeniu prawidłowych danych użytkownik zostaje zalogowany.
-  - Użytkownik uzyskuje dostęp do sekcji prywatnej aplikacji (np. „Moje plany").
+  - Użytkownik uzyskuje dostęp do sekcji prywatnej aplikacji (np. "Moje plany").
   - W przypadku błędnych danych logowania system wyświetla stosowny komunikat.
   - System oferuje opcję "Zapomniałem hasła" umożliwiającą odzyskanie dostępu do konta.
   - Aplikacja nie oferuje logowania przez zewnętrzne serwisy jak Google czy GitHub.
@@ -108,7 +113,7 @@ W ramach MVP aplikacja powinna zapewnić:
 - Tytuł: Przegląd listy dostępnych przewodników
 - Opis: Jako użytkownik chcę zobaczyć listę dostępnych przewodników twórców, abym mógł wybrać ten, który mnie najbardziej interesuje.
 - Kryteria akceptacji:
-  - Po wybraniu opcji „Dostępne przewodniki" aplikacja wyświetla listę pobraną z bazy (Supabase).
+  - Po wybraniu opcji "Dostępne przewodniki" aplikacja wyświetla listę pobraną z bazy (Supabase).
   - Każdy przewodnik zawiera podstawowe informacje (tytuł, krótki opis, autor, ocena).
   - System umożliwia filtrowanie przewodników według lokalizacji, języka, twórcy i tagów.
   - System obsługuje paginację listy przewodników.
@@ -149,7 +154,7 @@ W ramach MVP aplikacja powinna zapewnić:
 - Tytuł: Zapis planu w systemie
 - Opis: Jako zalogowany użytkownik chcę zapisać wygenerowany plan, aby móc do niego wrócić w przyszłości.
 - Kryteria akceptacji:
-  - Po kliknięciu opcji „Zapisz plan" aplikacja przechowuje plan w bazie (Supabase).
+  - Po kliknięciu opcji "Zapisz plan" aplikacja przechowuje plan w bazie (Supabase).
   - Użytkownik może nadać własną nazwę swojemu planowi.
   - Zapis zawiera: nazwę wybranego przewodnika, datę utworzenia, szczegóły harmonogramu, parametry generowania.
   - Użytkownik może oznaczyć plan jako ulubiony.
@@ -216,10 +221,28 @@ W ramach MVP aplikacja powinna zapewnić:
 - Opis: Jako zalogowany użytkownik chcę mieć możliwość bezpiecznego wylogowania się z aplikacji, aby zakończyć sesję i chronić dane mojego konta.
 - Kryteria akceptacji:
   - Przycisk wylogowania jest widoczny w prawym górnym rogu interfejsu dla zalogowanych użytkowników.
-  - Po wybraniu opcji „Wyloguj" aplikacja unieważnia sesję (token) i przekierowuje do ekranu logowania.
+  - Po wybraniu opcji "Wyloguj" aplikacja unieważnia sesję (token) i przekierowuje do ekranu logowania.
   - Dane sesji są usuwane z pamięci aplikacji.
   - Po wylogowaniu użytkownik nie ma dostępu do sekcji prywatnej aplikacji.
   - System wyświetla komunikat potwierdzający pomyślne wylogowanie.
+
+### US-015
+- Tytuł: Strona główna dostosowana do stanu użytkownika
+- Opis: Jako użytkownik chcę widzieć stronę główną dostosowaną do mojego stanu logowania, aby móc szybko przejść do interesujących mnie funkcji i znaleźć inspirację do planowania wycieczek.
+- Kryteria akceptacji dla użytkownika niezalogowanego:
+  - Strona główna zawiera atrakcyjne, wizualne wprowadzenie do koncepcji aplikacji.
+  - Widoczne są przyciski CTA (Call to Action) zachęcające do rejestracji i logowania.
+  - Prezentowane są wyróżnione przewodniki z oznaczeniem ceny jako zachęta do zakupu.
+  - Sekcja "Jak to działa" przedstawia kroki korzystania z aplikacji.
+  - Wyświetlane są przykłady pozytywnych recenzji od użytkowników.
+  - Prezentowane są korzyści z posiadania konta (zapisywanie planów, dostęp offline, recenzowanie).
+  - Widoczne są oznaczenia limitów funkcjonalności dla niezalogowanych użytkowników.
+- Kryteria akceptacji dla użytkownika zalogowanego:
+  - Strona główna zawiera personalizowane powitanie z imieniem użytkownika.
+  - Wyświetlana jest sekcja "Ostatnio zapisane plany" (maksymalnie 3-5 pozycji) z szybkim dostępem.
+  - Dostępna jest sekcja "Polecane przewodniki" bazująca na historii przeglądania i preferencjach.
+  - Widoczna jest sekcja "Nowości" prezentująca nowo dodane przewodniki.
+  - Dostępne są szybkie odnośniki do często używanych funkcji (generowanie planu, przeglądanie przewodników).
 
 ## 6. Architektura techniczna
 

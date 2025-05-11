@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { GuideSummaryDto, PaginationInfo, GuideListResponse } from "@/types";
 import { apiClient, ApiClientError } from "@/lib/utils/api-client";
 
@@ -91,6 +91,10 @@ export function useGuidesData(initialFilters: GuidesFilterViewModel = { page: 1,
       setLoading(false);
     }
   }, [filters]);
+
+  useEffect(() => {
+    fetchGuides();
+  }, [fetchGuides]);
 
   const handleFiltersChange = useCallback((newFilters: GuidesFilterViewModel) => {
     if (newFilters.min_days && newFilters.min_days < 1) {

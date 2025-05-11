@@ -16,19 +16,69 @@ Aplikacja będzie responsywna, z podejściem mobile-first, zapewniając optymaln
 
 ### 2.1. Strona Główna
 - **Ścieżka**: `/`
-- **Główny cel**: Wprowadzenie do aplikacji, zachęcenie do rejestracji/logowania i przedstawienie głównych funkcji
-- **Kluczowe informacje**:
-  - Banner z hasłem promocyjnym i przyciskiem CTA
-  - Skrócona lista polecanych przewodników
-  - Krótkie wyjaśnienie działania aplikacji
-- **Kluczowe komponenty**:
-  - Hero section z przyciskiem rejestracji/logowania
-  - Karuzela polecanych przewodników
-  - Sekcja "Jak to działa" (krótkie wyjaśnienie procesu)
-- **UX/Dostępność/Bezpieczeństwo**:
-  - Intuicyjny UX z jasnym CTA
-  - Obrazy z alternatywnym tekstem
-  - Responsywny design dla różnych urządzeń
+- **Główny cel**: Dostosowane wprowadzenie do aplikacji zależne od stanu logowania użytkownika
+- **Dwa warianty widoku**:
+  
+  #### 2.1.1. Strona główna dla użytkownika niezalogowanego
+  - **Główny cel**: Promowanie rejestracji i zachęcenie do zakupu przewodników
+  - **Kluczowe informacje**:
+    - Atrakcyjne wizualne wprowadzenie do koncepcji aplikacji
+    - Wyraźne przyciski CTA zachęcające do rejestracji/logowania
+    - Wyróżnione przykładowe przewodniki z oznaczeniem ceny
+    - Krótkie wyjaśnienie działania aplikacji i korzyści z posiadania konta
+    - Przykłady pozytywnych recenzji użytkowników
+  - **Kluczowe sekcje**:
+    - Hero section z hasłem promocyjnym i przyciskiem "Zarejestruj się"
+    - "Odkryj najlepsze przewodniki" - karuzela wyróżnionych płatnych przewodników
+    - "Jak to działa" - ilustrowany przewodnik po kluczowych funkcjach
+    - "Co mówią użytkownicy" - zaufanie społeczne budowane przez opinie
+    - "Korzyści" - lista funkcji dostępnych po rejestracji
+    - "Ograniczenia trybu gościa" - jasne oznaczenie limitów dla niezalogowanych
+  - **Kluczowe komponenty**:
+    - HeroSection: pełnoekranowy baner z grafikami i wezwaniem do działania
+    - FeaturedGuidesCarousel: przewodniki premium z oznaczeniem ceny
+    - HowItWorksSteps: ikony z krokami korzystania z aplikacji
+    - TestimonialSlider: slider z opiniami użytkowników
+    - BenefitsList: lista korzyści z ikonami
+    - RegisterCTA: przyciski rejestracji w kilku miejscach strony
+  - **UX/Dostępność/Bezpieczeństwo**:
+    - Wyraźne wizualne rozróżnienie elementów CTA
+    - Preload kluczowych obrazów dla poprawy czasu ładowania
+    - Przyjazny UX z jasną hierarchią informacji
+    - Obrazy z alternatywnym tekstem dla czytników ekranowych
+
+  #### 2.1.2. Strona główna dla użytkownika zalogowanego
+  - **Główny cel**: Zapewnienie szybkiego dostępu do ostatnich planów i promowanie zakupu przewodników
+  - **Kluczowe informacje**:
+    - Personalizowane powitanie z imieniem użytkownika
+    - Szybki dostęp do ostatnio zapisanych planów
+    - Rekomendowane przewodniki na podstawie historii przeglądania i preferencji
+    - Najnowsze dodane przewodniki
+  - **Kluczowe sekcje**:
+    - Górny pasek z powitaniem i szybkimi akcjami
+    - "Twoje ostatnie plany" - maksymalnie 3-5 ostatnio zapisanych planów
+    - "Polecane dla Ciebie" - przewodniki dopasowane do preferencji
+    - "Nowości" - ostatnio dodane przewodniki
+    - "Szybkie akcje" - przyciski do najczęściej używanych funkcji
+  - **Kluczowe komponenty**:
+    - UserWelcome: personalizowane powitanie z awatarem
+    - RecentPlansGrid: siatka ostatnich planów z miniaturami i szybkimi akcjami
+    - RecommendedGuidesSlider: karuzela rekomendowanych przewodników
+    - NewGuidesSection: lista nowo dodanych przewodników
+    - QuickActionsBar: przyciski szybkiego dostępu do głównych funkcji
+  - **UX/Dostępność/Bezpieczeństwo**:
+    - Personalizowane treści ładowane dopiero po pełnej autoryzacji
+    - Korzystanie z localStorage dla szybszego ładowania preferowanych ustawień
+    - Priorytezowane ładowanie sekcji z ostatnimi planami
+    - Cache'owanie danych z przewodników dla płynniejszego doświadczenia
+
+- **UX/Dostępność/Bezpieczeństwo dla obu wariantów**:
+  - Responsywny design z podejściem mobile-first
+  - Optymalizacja pod PWA z odpowiednimi meta-tagami
+  - Obrazy z alternatywnym tekstem dla czytników ekranowych
+  - Odpowiednie nagłówki dla hierarchii znaczenia
+  - Zabezpieczenie przed wyciekiem danych osobowych
+  - Zgodność z WCAG 2.1 AA
 
 ### 2.2. Logowanie
 - **Ścieżka**: `/login`
