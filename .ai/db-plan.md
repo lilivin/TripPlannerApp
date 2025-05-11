@@ -11,6 +11,7 @@
 - `last_login_at` TIMESTAMP WITH TIME ZONE
 - `is_active` BOOLEAN DEFAULT TRUE NOT NULL
 - `avatar_url` TEXT
+- `display_name` VARCHAR(100)
 - `deleted_at` TIMESTAMP WITH TIME ZONE
 
 ### creators
@@ -122,18 +123,6 @@
 - `last_synced_at` TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
 - PRIMARY KEY (user_id, plan_id)
 
-### notifications
-- `id` UUID PRIMARY KEY DEFAULT gen_random_uuid()
-- `user_id` UUID NOT NULL REFERENCES users(id)
-- `type` VARCHAR(50) NOT NULL CHECK (type IN ('new_guide', 'guide_update', 'promo', 'system', 'recommendation'))
-- `title` VARCHAR(255) NOT NULL
-- `description` TEXT
-- `is_read` BOOLEAN DEFAULT FALSE NOT NULL
-- `created_at` TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
-- `link` TEXT
-- `data` JSONB
-- `expires_at` TIMESTAMP WITH TIME ZONE
-
 ### user_guide_interactions
 - `user_id` UUID NOT NULL REFERENCES users(id)
 - `guide_id` UUID NOT NULL REFERENCES guides(id)
@@ -193,11 +182,7 @@
     - Plan może być cache'owany dla wielu użytkowników
     - Relacja poprzez tabelę łączącą `offline_cache_status`
 
-12. **users -> notifications** (Jeden do wielu)
-    - Użytkownik może mieć wiele powiadomień
-    - Relacja poprzez `notifications.user_id`
-
-13. **users <-> guides** dla interakcji (Wiele do wielu)
+12. **users <-> guides** dla interakcji (Wiele do wielu)
     - Użytkownik może wchodzić w interakcje z wieloma przewodnikami
     - Przewodnik może mieć interakcje od wielu użytkowników
     - Relacja poprzez tabelę łączącą `user_guide_interactions`
@@ -209,10 +194,14 @@
 - `CREATE INDEX idx_guides_creator_id ON guides(creator_id);`
 - `CREATE INDEX idx_guides_is_published ON guides(is_published) WHERE is_published = TRUE;`
 - `CREATE INDEX idx_guides_language ON guides(language);`
+- `CREATE INDEX idx_guides_created_at ON guides(created_at);` # Dla sekcji "Nowości"
 - `CREATE INDEX idx_attractions_creator_id ON attractions(creator_id);`
 - `CREATE INDEX idx_plans_user_id ON plans(user_id);`
 - `CREATE INDEX idx_plans_guide_id ON plans(guide_id);`
+- `CREATE INDEX idx_plans_created_at ON plans(created_at);` # Dla sekcji "Ostatnio zapisane plany"
+- `CREATE INDEX idx_plans_is_favorite ON plans(is_favorite) WHERE is_favorite = TRUE;`
 - `CREATE INDEX idx_reviews_guide_id ON reviews(guide_id);`
+- `CREATE INDEX idx_reviews_rating ON reviews(rating);` # Dla filtrowania i sortowania po ocenie
 
 ### Indeksy dla pól JSONB
 - `CREATE INDEX idx_attractions_opening_hours ON attractions USING GIN (opening_hours);`
@@ -231,13 +220,11 @@
 - `CREATE INDEX idx_attractions_deleted_at ON attractions(deleted_at) WHERE deleted_at IS NULL;`
 - `CREATE INDEX idx_plans_deleted_at ON plans(deleted_at) WHERE deleted_at IS NULL;`
 
-### Indeksy dla powiadomień i interakcji
-- `CREATE INDEX idx_notifications_user_id ON notifications(user_id);`
-- `CREATE INDEX idx_notifications_is_read ON notifications(is_read) WHERE is_read = FALSE;`
-- `CREATE INDEX idx_notifications_created_at ON notifications(created_at);`
+### Indeksy dla interakcji
 - `CREATE INDEX idx_user_guide_interactions_user_id ON user_guide_interactions(user_id);`
 - `CREATE INDEX idx_user_guide_interactions_guide_id ON user_guide_interactions(guide_id);`
 - `CREATE INDEX idx_user_guide_interactions_last_interaction ON user_guide_interactions(last_interaction_at);`
+- `CREATE INDEX idx_user_guide_interactions_type ON user_guide_interactions(interaction_type);`
 
 ## 4. Row-Level Security (RLS)
 
@@ -342,14 +329,6 @@ CREATE POLICY review_read_visible ON reviews
     USING (is_visible = TRUE);
 ```
 
-### notifications
-```sql
--- Polityka: Użytkownicy mogą czytać i aktualizować tylko swoje własne powiadomienia
-CREATE POLICY notification_manage_own ON notifications
-    FOR ALL
-    USING (auth.uid() = user_id);
-```
-
 ### user_guide_interactions
 ```sql
 -- Polityka: Użytkownicy mogą czytać tylko swoje własne interakcje
@@ -357,7 +336,7 @@ CREATE POLICY user_guide_interactions_read_own ON user_guide_interactions
     FOR SELECT
     USING (auth.uid() = user_id);
 
--- Polityka: System może odczytywać wszystkie interakcje
+-- Polityka: System może odczytywać wszystkie interakcje 
 CREATE POLICY user_guide_interactions_read_system ON user_guide_interactions
     FOR SELECT
     USING (auth.uid() IN (SELECT id FROM users WHERE is_admin = TRUE));
@@ -381,7 +360,7 @@ CREATE POLICY user_guide_interactions_upsert ON user_guide_interactions
 3. **PostGIS dla danych geograficznych** - Używamy typu GEOGRAPHY dla współrzędnych geograficznych atrakcji, co ułatwi:
    - Wyszukiwanie atrakcji w pobliżu lokalizacji użytkownika
    - Obliczanie odległości między atrakcjami
-   - Integrację z Google Maps
+   - Integrację z mapami OpenStreetMap/Leaflet
 
 4. **Row-Level Security (RLS)** - Zaimplementowaliśmy polityki RLS dla bezpieczeństwa na poziomie wiersza, co gwarantuje, że:
    - Użytkownicy mogą czytać i modyfikować tylko swoje dane
@@ -392,6 +371,7 @@ CREATE POLICY user_guide_interactions_upsert ON user_guide_interactions
    - GIN dla pól JSONB
    - GIST dla danych geograficznych
    - B-tree dla często używanych kolumn w zapytaniach filtrujących i łączących
+   - Dodatkowe indeksy dla wspierania funkcjonalności strony głównej (ostatnie plany, nowe przewodniki)
 
 6. **Normalizacja** - Schemat jest znormalizowany do poziomu 3NF, co gwarantuje minimalizację redundancji danych i zachowanie spójności.
 
@@ -401,7 +381,12 @@ CREATE POLICY user_guide_interactions_upsert ON user_guide_interactions
    - Tryb offline (tabela `offline_cache_status`)
    - Wielojęzyczność (kolumny `language` w tabelach `guides` i `language_preference` w `users`)
 
-8. **Rozszerzalność** - Schemat pozwala na łatwe dodawanie nowych funkcjonalności:
+8. **Wsparcie dla strony głównej** - Schemat zawiera elementy wspierające personalizowane treści na stronie głównej:
+   - Tabela `user_guide_interactions` śledzi interakcje użytkowników z przewodnikami 
+   - Indeksy na datach utworzenia i modyfikacji wspierają efektywne zapytania o najnowsze plany i przewodniki
+   - Pole `display_name` w tabeli `users` umożliwia personalizowane powitania
+
+9. **Rozszerzalność** - Schemat pozwala na łatwe dodawanie nowych funkcjonalności:
    - System tagowania może być rozszerzony o nowe kategorie
    - Struktura JSONB pozwala na dodawanie nowych atrybutów bez zmian schematu
    - Relacje są zaprojektowane z myślą o przyszłych funkcjonalnościach 
