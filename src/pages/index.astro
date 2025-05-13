@@ -1,8 +1,8 @@
 ---
-import Welcome from "../components/Welcome.astro";
-import MainLayout from "../layouts/MainLayout.astro";
+import Layout from "@/layouts/MainLayout.astro";
+import HomePage from "@/components/HomePage";
 ---
 
-<MainLayout>
-  <Welcome />
-</MainLayout>
+<Layout title="TripPlanner - Discover and Plan Your Perfect Trip">
+  <HomePage client:load />
+</Layout>

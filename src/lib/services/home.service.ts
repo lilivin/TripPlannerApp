@@ -46,122 +46,138 @@ export async function getUserHomeData(
   userId: string,
   language = "pl"
 ): Promise<HomeUserResponse> {
-  // Pobierz dane powitania użytkownika
-  const { data: userData, error: userError } = await supabase
-    .from("users")
-    .select("avatar_url, display_name")
-    .eq("id", userId)
-    .single();
+  try {
+    // Pobierz dane powitania użytkownika
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("avatar_url, email")
+      .eq("id", userId)
+      .maybeSingle();
 
-  if (userError) throw userError;
+    if (userError) {
+      console.error("Error fetching user data:", userError);
+      throw userError;
+    }
 
-  // Pobierz ostatnie plany użytkownika
-  const { data: recentPlans, error: plansError } = await supabase
-    .from("plans")
-    .select(
+    // If no user data found, use default values
+    const displayName = userData?.email?.split("@")[0] || "użytkowniku";
+    const avatarUrl = userData?.avatar_url || null;
+
+    // Pobierz ostatnie plany użytkownika
+    const { data: recentPlans, error: plansError } = await supabase
+      .from("plans")
+      .select(
+        `
+        id,
+        name,
+        created_at,
+        is_favorite,
+        guides:guide_id (
+          title,
+          location_name,
+          cover_image_url
+        )
       `
-      id,
-      name,
-      created_at,
-      is_favorite,
-      guides:guide_id (
-        title,
-        location_name,
-        cover_image_url
       )
-    `
-    )
-    .eq("user_id", userId)
-    .filter("deleted_at", "is", null)
-    .order("created_at", { ascending: false })
-    .limit(3);
+      .eq("user_id", userId)
+      .filter("deleted_at", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(3);
 
-  if (plansError) throw plansError;
+    if (plansError) {
+      console.error("Error fetching recent plans:", plansError);
+      throw plansError;
+    }
 
-  // Pobierz rekomendowane przewodniki
-  const { data: interactionData, error: interactionError } = await supabase
-    .from("user_guide_interactions")
-    .select("guide_id, interaction_type, interaction_count")
-    .eq("user_id", userId)
-    .order("last_interaction_at", { ascending: false });
-
-  if (interactionError) throw interactionError;
-
-  // Analiza interakcji dla personalizowanych rekomendacji
-  const interactionGuideIds = interactionData.map((i) => i.guide_id);
-
-  const { data: recommendedGuides, error: recommendedError } = await supabase
-    .from("guides")
-    .select(
+    // Pobierz rekomendowane przewodniki (bez interakcji użytkownika)
+    const { data: recommendedGuides, error: recommendedError } = await supabase
+      .from("guides")
+      .select(
+        `
+        id,
+        title,
+        description,
+        price,
+        location_name,
+        cover_image_url,
+        average_rating:reviews(rating).avg()
       `
-      id,
-      title,
-      description,
-      price,
-      location_name,
-      cover_image_url,
-      average_rating:reviews(rating).avg()
-    `
-    )
-    .eq("is_published", true)
-    .eq("language", language)
-    .filter("deleted_at", "is", null)
-    .filter("id", "not.in", `(${interactionGuideIds.join(",")})`)
-    .limit(3);
+      )
+      .eq("is_published", true)
+      .eq("language", language)
+      .filter("deleted_at", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(3);
 
-  if (recommendedError) throw recommendedError;
+    if (recommendedError) {
+      console.error("Error fetching recommended guides:", recommendedError);
+      throw recommendedError;
+    }
 
-  // Pobierz nowe przewodniki
-  const { data: newGuides, error: newGuidesError } = await supabase
-    .from("guides")
-    .select(
+    // Pobierz nowe przewodniki
+    const { data: newGuides, error: newGuidesError } = await supabase
+      .from("guides")
+      .select(
+        `
+        id,
+        title,
+        price,
+        location_name,
+        cover_image_url,
+        created_at
       `
-      id,
-      title,
-      price,
-      location_name,
-      cover_image_url,
-      created_at as added_at
-    `
-    )
-    .eq("is_published", true)
-    .eq("language", language)
-    .filter("deleted_at", "is", null)
-    .order("created_at", { ascending: false })
-    .limit(5);
+      )
+      .eq("is_published", true)
+      .eq("language", language)
+      .filter("deleted_at", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(5);
 
-  if (newGuidesError) throw newGuidesError;
+    if (newGuidesError) {
+      console.error("Error fetching new guides:", newGuidesError);
+      throw newGuidesError;
+    }
 
-  // Przygotowanie rekomendacji z uzasadnieniami
-  const recommendedWithReasons = (recommendedGuides as unknown as FeaturedGuideDto[]).map(
-    (guide): RecommendedGuideDto => ({
-      ...guide,
-      reason: "Dopasowane do Twoich preferencji podróży",
-    })
-  );
+    // Przygotowanie rekomendacji z uzasadnieniami
+    const recommendedWithReasons = (recommendedGuides as unknown as FeaturedGuideDto[]).map(
+      (guide): RecommendedGuideDto => ({
+        ...guide,
+        reason: "Popularne wśród podróżników",
+      })
+    );
 
-  // Przygotowanie ostatnich planów z miniaturami
-  const formattedRecentPlans = recentPlans.map(
-    (plan: Record<string, unknown>): RecentPlanDto => ({
-      id: plan.id as string,
-      name: plan.name as string,
-      guide: {
-        title: (plan.guides as Record<string, string>).title,
-        location_name: (plan.guides as Record<string, string>).location_name,
+    // Przygotowanie ostatnich planów z miniaturami
+    const formattedRecentPlans = (recentPlans || []).map((plan: Record<string, unknown>): RecentPlanDto => {
+      const guides = (plan.guides as Record<string, string | null>) || {};
+      return {
+        id: plan.id as string,
+        name: plan.name as string,
+        guide: {
+          title: guides.title || "Untitled Guide",
+          location_name: guides.location_name || "Unknown Location",
+        },
+        created_at: plan.created_at as string,
+        is_favorite: plan.is_favorite as boolean,
+        thumbnail_url: guides.cover_image_url,
+      };
+    });
+
+    return {
+      user_greeting: {
+        display_name: displayName,
+        avatar_url: avatarUrl,
       },
-      created_at: plan.created_at as string,
-      is_favorite: plan.is_favorite as boolean,
-      thumbnail_url: (plan.guides as Record<string, string | null>).cover_image_url,
-    })
-  );
-
-  return {
-    user_greeting: {
-      display_name: userData.display_name || "użytkowniku",
-      avatar_url: userData.avatar_url,
-    },
-    recent_plans: formattedRecentPlans,
-    recommended_guides: recommendedWithReasons,
-    new_guides: newGuides as unknown as NewGuideDto[],
-  };
+      recent_plans: formattedRecentPlans,
+      recommended_guides: recommendedWithReasons,
+      new_guides: newGuides
+        ? (newGuides.map((guide) => ({
+            ...guide,
+            added_at: guide.created_at,
+          })) as unknown as NewGuideDto[])
+        : [],
+    };
+  } catch (error) {
+    console.error("Error in getUserHomeData:", error);
+    throw error;
+  }
 }
