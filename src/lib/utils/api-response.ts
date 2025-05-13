@@ -79,46 +79,24 @@ export const ErrorStatusCodes = {
 };
 
 /**
- * Helper class for consistent API errors
+ * Klasa reprezentująca błąd API
  */
-export class ApiError<T = unknown> extends Error {
-  public readonly type: string;
-  public readonly details?: T;
+export class ApiError extends Error {
+  status: number;
+  details?: Record<string, unknown>;
 
-  constructor(type: string, message: string, details?: T) {
+  constructor(status: number, message: string, details?: Record<string, unknown>) {
     super(message);
-    this.type = type;
-    this.details = details;
     this.name = "ApiError";
+    this.status = status;
+    this.details = details;
   }
 
   /**
-   * Creates a Response object from this error
+   * Tworzy odpowiedź na podstawie instancji błędu
    */
-  toResponse(): Response {
-    const status = ErrorStatusCodes[this.type] || 500;
-    return createErrorResponse(status, this.message, this.details, this.type);
-  }
-
-  // Helper factory methods for common errors
-  static validationError<T = unknown>(message: string, details?: T): ApiError<T> {
-    return new ApiError<T>(ApiErrorTypes.VALIDATION_ERROR, message, details);
-  }
-
-  static authenticationError(message = "Wymagane uwierzytelnienie"): ApiError {
-    return new ApiError(ApiErrorTypes.AUTHENTICATION_ERROR, message);
-  }
-
-  static authorizationError(message = "Brak wymaganych uprawnień"): ApiError {
-    return new ApiError(ApiErrorTypes.AUTHORIZATION_ERROR, message);
-  }
-
-  static notFoundError(resource = "Zasób"): ApiError {
-    return new ApiError(ApiErrorTypes.RESOURCE_NOT_FOUND, `${resource} nie został znaleziony`);
-  }
-
-  static internalError(message = "Wystąpił błąd wewnętrzny serwera"): ApiError {
-    return new ApiError(ApiErrorTypes.INTERNAL_ERROR, message);
+  toResponse() {
+    return createErrorResponse(this.status, this.message, this.details);
   }
 }
 

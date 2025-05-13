@@ -29,6 +29,78 @@ export interface UpdateUserProfileCommand {
 }
 
 /**
+ * Featured Guide DTO
+ */
+export interface FeaturedGuideDto {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  location_name: string;
+  cover_image_url: string | null;
+  average_rating: number | null;
+}
+
+/**
+ * Home Guest Response DTO
+ */
+export interface HomeGuestResponse {
+  featured_guides: FeaturedGuideDto[];
+}
+
+/**
+ * User Greeting DTO
+ */
+export interface UserGreetingDto {
+  display_name: string;
+  avatar_url: string | null;
+}
+
+/**
+ * Recent Plan DTO
+ */
+export interface RecentPlanDto {
+  id: string;
+  name: string;
+  guide: {
+    title: string;
+    location_name: string;
+  };
+  created_at: string;
+  is_favorite: boolean;
+  thumbnail_url: string | null;
+}
+
+/**
+ * Recommended Guide DTO
+ */
+export interface RecommendedGuideDto extends FeaturedGuideDto {
+  reason: string;
+}
+
+/**
+ * New Guide DTO
+ */
+export interface NewGuideDto {
+  id: string;
+  title: string;
+  price: number;
+  location_name: string;
+  cover_image_url: string | null;
+  added_at: string;
+}
+
+/**
+ * Home User Response DTO
+ */
+export interface HomeUserResponse {
+  user_greeting: UserGreetingDto;
+  recent_plans: RecentPlanDto[];
+  recommended_guides: RecommendedGuideDto[];
+  new_guides: NewGuideDto[];
+}
+
+/**
  * Creator summary DTO (used in listings)
  */
 export interface CreatorSummaryDto {

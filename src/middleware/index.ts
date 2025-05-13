@@ -1,4 +1,5 @@
 import { defineMiddleware } from "astro:middleware";
+import type { Database } from "../db/database.types";
 import { createSupabaseServerInstance } from "../db/supabase.server";
 
 // Public paths - Auth API endpoints & Server-Rendered Astro Pages
@@ -20,7 +21,7 @@ const PUBLIC_PATHS = [
 ];
 
 // Add API paths to ensure they always return JSON
-const API_PATHS = ["/api/auth/session", "/api/guides", "/api/plans", "/api/ai", "/api/attractions"];
+const API_PATHS = ["/api/auth/session", "/api/guides", "/api/plans", "/api/ai", "/api/attractions", "/api/home"];
 
 export const onRequest = defineMiddleware(async ({ locals, cookies, url, request, redirect }, next) => {
   // Handle CORS preflight requests
