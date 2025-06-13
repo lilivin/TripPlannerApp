@@ -18,9 +18,11 @@ interface User {
   email: string | null;
 }
 
-declare namespace App {
-  interface Locals {
-    supabase: SupabaseClient<Database>;
-    user?: User;
+declare global {
+  namespace App {
+    interface Locals {
+      supabase: SupabaseClient<Database>;
+      user?: User;
+    }
   }
 }

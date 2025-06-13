@@ -1,5 +1,4 @@
 import { defineMiddleware } from "astro:middleware";
-import type { Database } from "../db/database.types";
 import { createSupabaseServerInstance } from "../db/supabase.server";
 
 // Public paths - Auth API endpoints & Server-Rendered Astro Pages
@@ -119,7 +118,7 @@ export const onRequest = defineMiddleware(async ({ locals, cookies, url, request
 
   if (user) {
     locals.user = {
-      email: user.email,
+      email: user.email ?? null,
       id: user.id,
     };
   } else if (!PUBLIC_PATHS.includes(url.pathname)) {

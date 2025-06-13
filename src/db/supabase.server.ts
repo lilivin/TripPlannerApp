@@ -1,5 +1,5 @@
 import type { AstroCookies } from "astro";
-import { createServerClient, type CookieOptionsWithName, type Cookie } from "@supabase/ssr";
+import { createServerClient, type CookieOptionsWithName } from "@supabase/ssr";
 import type { Database } from "./database.types";
 
 export const cookieOptions: CookieOptionsWithName = {
@@ -23,7 +23,7 @@ export const createSupabaseServerInstance = (context: { headers: Headers; cookie
       getAll() {
         return parseCookieHeader(context.headers.get("Cookie") ?? "");
       },
-      setAll(cookiesToSet: Cookie[]) {
+      setAll(cookiesToSet: { name: string; value: string; options: CookieOptionsWithName }[]) {
         cookiesToSet.forEach(({ name, value, options }) => context.cookies.set(name, value, options));
       },
     },

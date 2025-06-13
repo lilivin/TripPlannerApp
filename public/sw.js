@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* global self, caches, fetch, Response, indexedDB, console */
 /* Service Worker for Trip Planner App */
 
 const CACHE_NAME = "trip-planner-cache-v1";

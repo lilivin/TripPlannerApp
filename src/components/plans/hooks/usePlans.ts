@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { PlansViewFilterState, PlanDeleteState } from "@/types/plans";
 import type { PlanSummaryDto } from "@/types";
@@ -25,6 +25,16 @@ export function usePlans() {
   // State for delete dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [planToDelete, setPlanToDelete] = useState<PlanDeleteState | null>(null);
+
+  // State for navigation
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+
+  // Effect to handle navigation
+  useEffect(() => {
+    if (pendingNavigation) {
+      document.location.href = pendingNavigation;
+    }
+  }, [pendingNavigation]);
 
   // Query for fetching plans
   const { data, isLoading, isInitialLoading, error } = useQuery({
@@ -107,19 +117,19 @@ export function usePlans() {
   };
 
   // Function to navigate to plan details
-  const handleViewPlan = (id: string) => {
+  const handleViewPlan = useCallback((id: string) => {
     if (!id) {
       console.error("Invalid plan ID for view");
       return;
     }
 
-    window.location.href = `/plans/${id}`;
-  };
+    setPendingNavigation(`/plans/${id}`);
+  }, []);
 
   // Function to navigate to create new plan
-  const handleCreateNew = () => {
-    window.location.href = "/guides";
-  };
+  const handleCreateNew = useCallback(() => {
+    setPendingNavigation("/guides");
+  }, []);
 
   return {
     plans: data?.plans ?? [],

@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -9,6 +10,16 @@ import { useAuth, registerSchema, type RegisterFormData } from "@/components/hoo
 
 export default function RegisterForm() {
   const { register, isLoading, error } = useAuth();
+
+  // State for navigation
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+
+  // Effect to handle navigation
+  useEffect(() => {
+    if (pendingNavigation) {
+      document.location.href = pendingNavigation;
+    }
+  }, [pendingNavigation]);
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -25,13 +36,13 @@ export default function RegisterForm() {
 
     if (result.success) {
       // Use Astro's client-side navigation
-      document.location.href = "/login";
+      setPendingNavigation("/login");
     }
   };
 
   const handleSignInClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    document.location.href = "/login";
+    setPendingNavigation("/login");
   };
 
   return (
