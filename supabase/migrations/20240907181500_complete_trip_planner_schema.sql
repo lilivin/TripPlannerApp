@@ -321,14 +321,14 @@ create policy "guides_select_anon" on guides
 create policy "guides_select_auth" on guides
     for select to authenticated
     using (
-        is_published = true 
+        (is_published = true and deleted_at is null)
         or id in (
             select guide_id from user_guide_access
             where user_id = auth.uid()
             and (expires_at is null or expires_at > now())
         )
-        or auth.uid() in (
-            select user_id from creators where id = creator_id
+        or creator_id in (
+            select id from creators where user_id = auth.uid()
         )
     );
 
@@ -338,8 +338,8 @@ create policy "guides_insert_anon" on guides
 
 create policy "guides_insert_auth" on guides
     for insert to authenticated
-    with check (auth.uid() in (
-        select user_id from creators where id = creator_id
+    with check (creator_id in (
+        select id from creators where user_id = auth.uid()
     ));
 
 create policy "guides_update_anon" on guides
@@ -349,8 +349,8 @@ create policy "guides_update_anon" on guides
 
 create policy "guides_update_auth" on guides
     for update to authenticated
-    using (auth.uid() in (select user_id from creators where id = creator_id))
-    with check (auth.uid() in (select user_id from creators where id = creator_id));
+    using (creator_id in (select id from creators where user_id = auth.uid()))
+    with check (creator_id in (select id from creators where user_id = auth.uid()));
 
 create policy "guides_delete_anon" on guides
     for delete to anon
@@ -358,7 +358,7 @@ create policy "guides_delete_anon" on guides
 
 create policy "guides_delete_auth" on guides
     for delete to authenticated
-    using (auth.uid() in (select user_id from creators where id = creator_id));
+    using (creator_id in (select id from creators where user_id = auth.uid()));
 
 -- attractions table policies
 create policy "attractions_select_anon" on attractions
@@ -388,9 +388,9 @@ create policy "attractions_select_auth" on attractions
                     and deleted_at is null
                 )
             )
-            or auth.uid() in (
-                select user_id from creators 
-                where id = creator_id
+            or creator_id in (
+                select id from creators 
+                where user_id = auth.uid()
             )
         )
     );
@@ -401,9 +401,9 @@ create policy "attractions_insert_anon" on attractions
 
 create policy "attractions_insert_auth" on attractions
     for insert to authenticated
-    with check (auth.uid() in (
-        select user_id from creators 
-        where id = creator_id
+    with check (creator_id in (
+        select id from creators 
+        where user_id = auth.uid()
     ));
 
 create policy "attractions_update_anon" on attractions
@@ -413,8 +413,8 @@ create policy "attractions_update_anon" on attractions
 
 create policy "attractions_update_auth" on attractions
     for update to authenticated
-    using (auth.uid() in (select user_id from creators where id = creator_id))
-    with check (auth.uid() in (select user_id from creators where id = creator_id));
+    using (creator_id in (select id from creators where user_id = auth.uid()))
+    with check (creator_id in (select id from creators where user_id = auth.uid()));
 
 create policy "attractions_delete_anon" on attractions
     for delete to anon
@@ -422,7 +422,7 @@ create policy "attractions_delete_anon" on attractions
 
 create policy "attractions_delete_auth" on attractions
     for delete to authenticated
-    using (auth.uid() in (select user_id from creators where id = creator_id));
+    using (creator_id in (select id from creators where user_id = auth.uid()));
 
 -- guide_attractions junction table policies
 create policy "guide_attractions_select_anon" on guide_attractions
@@ -445,9 +445,9 @@ create policy "guide_attractions_select_auth" on guide_attractions
         )
         or guide_id in (
             select id from guides
-            where auth.uid() in (
-                select user_id from creators 
-                where id = creator_id
+            where creator_id in (
+                select id from creators 
+                where user_id = auth.uid()
             )
         )
     );
@@ -461,9 +461,9 @@ create policy "guide_attractions_insert_auth" on guide_attractions
     with check (
         guide_id in (
             select id from guides
-            where auth.uid() in (
-                select user_id from creators 
-                where id = creator_id
+            where creator_id in (
+                select id from creators 
+                where user_id = auth.uid()
             )
         )
     );
@@ -478,18 +478,18 @@ create policy "guide_attractions_update_auth" on guide_attractions
     using (
         guide_id in (
             select id from guides
-            where auth.uid() in (
-                select user_id from creators 
-                where id = creator_id
+            where creator_id in (
+                select id from creators 
+                where user_id = auth.uid()
             )
         )
     )
     with check (
         guide_id in (
             select id from guides
-            where auth.uid() in (
-                select user_id from creators 
-                where id = creator_id
+            where creator_id in (
+                select id from creators 
+                where user_id = auth.uid()
             )
         )
     );
@@ -503,9 +503,9 @@ create policy "guide_attractions_delete_auth" on guide_attractions
     using (
         guide_id in (
             select id from guides
-            where auth.uid() in (
-                select user_id from creators 
-                where id = creator_id
+            where creator_id in (
+                select id from creators 
+                where user_id = auth.uid()
             )
         )
     );
@@ -563,9 +563,9 @@ create policy "attraction_tags_insert_auth" on attraction_tags
     with check (
         attraction_id in (
             select id from attractions
-            where auth.uid() in (
-                select user_id from creators 
-                where id = creator_id
+            where creator_id in (
+                select id from creators 
+                where user_id = auth.uid()
             )
         )
     );
@@ -579,9 +579,9 @@ create policy "attraction_tags_delete_auth" on attraction_tags
     using (
         attraction_id in (
             select id from attractions
-            where auth.uid() in (
-                select user_id from creators 
-                where id = creator_id
+            where creator_id in (
+                select id from creators 
+                where user_id = auth.uid()
             )
         )
     );

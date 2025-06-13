@@ -33,19 +33,19 @@ const howItWorksSteps: HowItWorksStep[] = [
 
 const testimonials: Testimonial[] = [
   {
-    avatarUrl: "/images/testimonials/user-1.jpg",
+    avatarUrl: "/images/testimonials/user-1.svg",
     name: "Alex Morgan",
     text: "TripPlanner made planning our honeymoon so easy! The personalized recommendations were spot on.",
     rating: 5,
   },
   {
-    avatarUrl: "/images/testimonials/user-2.jpg",
+    avatarUrl: "/images/testimonials/user-2.svg",
     name: "Sara Johnson",
     text: "I love how I can access all my travel plans offline. Saved me when I lost connection in rural Italy!",
     rating: 5,
   },
   {
-    avatarUrl: "/images/testimonials/user-3.jpg",
+    avatarUrl: "/images/testimonials/user-3.svg",
     name: "David Chen",
     text: "As a frequent business traveler, this app has simplified my life. The custom plans save me hours of research.",
     rating: 4,

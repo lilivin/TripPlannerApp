@@ -41,8 +41,9 @@ export function TestimonialSlider({ testimonials }: TestimonialSliderProps) {
                       alt={testimonial.name}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        // Fallback for missing images
-                        (e.target as HTMLImageElement).src = "https://via.placeholder.com/150";
+                        // Fallback for missing images - using a local SVG placeholder
+                        (e.target as HTMLImageElement).src =
+                          "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 150'%3E%3Crect width='150' height='150' fill='%23f1f5f9'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='14' fill='%2364748b' text-anchor='middle' dy='0.3em'%3ENo Image%3C/text%3E%3C/svg%3E";
                       }}
                     />
                   </div>
