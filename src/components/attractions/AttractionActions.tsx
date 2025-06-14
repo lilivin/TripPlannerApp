@@ -20,7 +20,7 @@ export default function AttractionActions({ onRemove, onEditNote, hasNote = fals
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>{hasNote ? "Edit note" : "Add note"}</p>
+            <p>{hasNote ? "Edit note" : "Add notee"}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
