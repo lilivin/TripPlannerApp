@@ -54,7 +54,7 @@ jobs:
   status-comment:
     name: PR Status Comment
     if: always()
-    needs: [unit-test, e2e-test]
+    needs: [unit-test]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -85,7 +85,6 @@ jobs:
             
             // Get PR result status
             const unitStatus = '${{ needs.unit-test.result }}';
-            const e2eStatus = '${{ needs.e2e-test.result }}';
             
             const getStatusEmoji = (status) => {
               return status === 'success' ? '✅' : status === 'skipped' ? '⏭️' : '❌';
@@ -98,16 +97,10 @@ jobs:
             | --- | ------ |
             | Lint | ${getStatusEmoji('${{ needs.lint.result }}')} |
             | Unit Tests | ${getStatusEmoji(unitStatus)} |
-            | E2E Tests | ${getStatusEmoji(e2eStatus)} |
             
             ### Unit Test Coverage
             
             ${unitCoverage}
-            
-            ### E2E Test Results
-            
-            Artifact: [Download Playwright Report](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID})
-            `;
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
