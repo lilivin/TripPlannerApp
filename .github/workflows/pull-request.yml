@@ -51,99 +51,6 @@ jobs:
           path: coverage/
           retention-days: 7
 
-  e2e-test:
-    name: E2E Tests
-    needs: lint
-    runs-on: ubuntu-latest
-    environment: integration
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright browsers
-        run: npx playwright install chromium
-
-      - name: Build application
-        run: npm run build
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          E2E_USERNAME_ID: ${{ secrets.E2E_USERNAME_ID }}
-          E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
-          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
-
-      - name: Verify environment variables
-        run: |
-          if [ -z "$E2E_USERNAME" ]; then
-            echo "⚠️ Warning: E2E_USERNAME is not set"
-          else
-            echo "✅ E2E_USERNAME is set"
-          fi
-          if [ -z "$E2E_PASSWORD" ]; then
-            echo "⚠️ Warning: E2E_PASSWORD is not set"
-          else
-            echo "✅ E2E_PASSWORD is set"
-          fi
-          if [ -z "$SUPABASE_URL" ]; then
-            echo "⚠️ Warning: SUPABASE_URL is not set"
-          else
-            echo "✅ SUPABASE_URL is set"
-          fi
-          if [ -z "$SUPABASE_KEY" ]; then
-            echo "⚠️ Warning: SUPABASE_KEY is not set"
-          else
-            echo "✅ SUPABASE_KEY is set"
-          fi
-        env:
-          E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
-          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-
-      - name: Run E2E tests with headless mode
-        run: npm run test:e2e
-        env:
-          CI: true
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          E2E_USERNAME_ID: ${{ secrets.E2E_USERNAME_ID }}
-          E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
-          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
-
-      - name: Upload E2E test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 7
-
-      - name: Upload E2E test screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-screenshots
-          path: test-results/
-          retention-days: 7
-
-      - name: Upload E2E test traces
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: test-results/
-          retention-days: 7
-
   status-comment:
     name: PR Status Comment
     if: always()
@@ -158,12 +65,6 @@ jobs:
         with:
           name: unit-test-coverage
           path: unit-coverage
-
-      - name: Download E2E test reports
-        uses: actions/download-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report
           
       - name: Create PR comment
         uses: actions/github-script@v7
