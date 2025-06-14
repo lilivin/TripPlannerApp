@@ -95,7 +95,6 @@ jobs:
             
             | Job | Status |
             | --- | ------ |
-            | Lint | ${getStatusEmoji('${{ needs.lint.result }}')} |
             | Unit Tests | ${getStatusEmoji(unitStatus)} |
             
             ### Unit Test Coverage
