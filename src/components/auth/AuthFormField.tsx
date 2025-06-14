@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import type { Control, FieldPath, FieldValues } from "react-hook-form";
+import { cn } from "@/lib/utils";
 
 interface AuthFormFieldProps<TFieldValues extends FieldValues, TName extends FieldPath<TFieldValues>> {
   control: Control<TFieldValues>;
@@ -52,6 +53,7 @@ export function AuthFormField<TFieldValues extends FieldValues, TName extends Fi
                 data-testid={inputTestId}
                 aria-invalid={!!fieldState.error}
                 aria-describedby={fieldState.error ? errorTestId : undefined}
+                className={cn(fieldState.error && "border-red-300")}
                 {...field}
               />
             )}

@@ -1,7 +1,8 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuth, type LoginFormData, loginSchema } from "@/components/hooks/useAuth";
+import { useAuth, type LoginFormData } from "@/components/hooks/useAuth";
+import { loginSchema } from "@/lib/validations/auth";
 import { AuthFormField } from "@/components/auth/AuthFormField";
 import { AuthError } from "@/components/auth/AuthError";
 import { LoadingButton } from "@/components/auth/LoadingButton";
@@ -16,7 +17,8 @@ const LoginForm: React.FC = () => {
       email: "",
       password: "",
     },
-    mode: "onTouched",
+    mode: "all",
+    reValidateMode: "onChange",
   });
 
   const onSubmit = (data: LoginFormData) => {
